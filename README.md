@@ -25,16 +25,15 @@ cd greedbot-python-sdk
 pip install -e .
 ```
 
-*(Note: To publish this package to PyPI under `pip install greedbot`, build the distribution wheel with `python -m build` and upload via `twine upload dist/*` with your PyPI credentials).*
-
 ---
 
 ## 🔑 Authentication & Quickstart
 
-Set your GreedBot API Key as an environment variable:
+Set your API keys as environment variables:
 
 ```bash
-export GREEDBOT_API_KEY="your_api_key_here"
+export GREEDBOT_API_KEY="***"
+export OPENAI_API_KEY="***"  # Optional: Or ANTHROPIC_API_KEY / GEMINI_API_KEY
 ```
 
 ### 1. Fetch Quantitative Price Targets & Sizing
@@ -52,27 +51,31 @@ kelly = client.get_kelly(["AAPL", "AMZN"])
 print(kelly)
 ```
 
-### 2. Run Quantitative AI Strategies
+### 2. Plug-and-Play LLM Qualitative Analysis Pipeline
+Use any LLM (OpenAI, Anthropic, Gemini, or local models) to analyze SEC filings, earnings transcripts, or news, then pipe structured sentiment & conviction directly into GreedBot:
+
 ```python
-from greedbot import GreedBotClient
-from greedbot.strategies import (
-    QualitativeOverlayEngine,
-    OptionKellyEngine,
-    VolatilityHarvestEngine
-)
+from greedbot import GreedBotClient, LLMAnalyzer
+from greedbot.strategies import QualitativeOverlayEngine
 
 client = GreedBotClient()
 
-# Qualitative Catalyst vs Options Implied Move Asymmetry
-qual = QualitativeOverlayEngine(client)
-signal = qual.evaluate_divergence(ticker="NVDA", qualitative_sentiment=0.85)
+# 1. Initialize plug-and-play LLM adapter (auto-detects OpenAI/Anthropic/Gemini)
+llm = LLMAnalyzer(provider="auto")
+
+# 2. Extract structured qualitative sentiment (-1.0 to +1.0) & conviction (0.0 to 1.0)
+catalyst_text = "Company reported Q2 revenue growth of +112% YoY and secured a $50M initial order..."
+analysis = llm.analyze_catalyst(ticker="POET", text=catalyst_text)
+
+# 3. Pipe into GreedBot Qualitative Overlay Engine
+qual_engine = QualitativeOverlayEngine(client)
+signal = qual_engine.evaluate_divergence(
+    ticker="POET",
+    qualitative_sentiment=analysis["qualitative_sentiment"],
+    conviction=analysis["catalyst_conviction"]
+)
 print(signal)
 # Output: {'assessment': 'ASYMMETRIC_UNDERPRICED_VOLATILITY', 'recommended_trade': 'Buy OTM Call Spread'}
-
-# Non-Linear Kelly Convexity Option Sizing
-kelly_opt = OptionKellyEngine(client)
-sizing = kelly_opt.calculate_sizing(ticker="NVDA", portfolio_size=25000.0)
-print(f"Max Risk Budget: ${sizing['max_risk_budget']}")
 ```
 
 ---
@@ -104,6 +107,14 @@ greedbot scan
 3. **Sector Volatility Contagion:** Detects sympathy volatility spillover opportunities during earnings cycles.
 4. **Macro Dynamic Regime-Switching Matrix:** Rebalances portfolios between Aggressive Kelly Momentum, Risk Parity, and Defensive Cash.
 5. **Earnings Volatility Harvest:** Identifies high-IV, low-conviction setups for delta-neutral Iron Condors.
+
+---
+
+## 📂 Examples & Demos
+
+Check the [`examples/`](examples/) directory for full runnable scripts:
+- [`examples/quickstart.py`](examples/quickstart.py): End-to-end tour of client methods and strategy sizing.
+- [`examples/llm_qualitative_pipeline.py`](examples/llm_qualitative_pipeline.py): Live catalyst text analysis using OpenAI/Anthropic/Gemini with GreedBot.
 
 ---
 

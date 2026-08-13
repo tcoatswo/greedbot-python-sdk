@@ -11,6 +11,7 @@ from .strategies import (
     MacroRegimeMatrix,
     VolatilityHarvestEngine,
 )
+from .llm import LLMAnalyzer
 
 __version__ = "1.0.0"
 __all__ = [
@@ -20,4 +21,5 @@ __all__ = [
     "QualitativeOverlayEngine",
     "MacroRegimeMatrix",
     "VolatilityHarvestEngine",
+    "LLMAnalyzer",
 ]
