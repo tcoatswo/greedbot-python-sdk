@@ -1,10 +1,9 @@
 # ⚡ GreedBot Python SDK (`greedbot`)
 
-The official Python client library and quantitative strategy toolkit for the **[GreedBot API](https://greedbot.com)**.
+An open-source, community-maintained Python client library and quantitative strategy toolkit for interacting with the **[GreedBot API](https://greedbot.com)**.
 
-GreedBot provides real-time quantitative momentum indicators, Kelly Criterion capital allocation, volatility surface analytics, and AI-driven trade generation.
+> **Disclaimer:** This is an unofficial, community-developed SDK and is not affiliated with or endorsed by GreedBot.
 
-[![PyPI Version](https://img.shields.io/badge/pypi-v1.0.0-blue.svg)](https://pypi.org/project/greedbot/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 
@@ -12,17 +11,21 @@ GreedBot provides real-time quantitative momentum indicators, Kelly Criterion ca
 
 ## 📦 Installation
 
+Install directly from GitHub using `pip`:
+
 ```bash
-pip install greedbot
+pip install git+https://github.com/tcoatswo/greedbot-python-sdk.git
 ```
 
-Or install from source:
+Or install locally in editable/development mode:
 
 ```bash
-git clone https://github.com/greedbot/greedbot-python-sdk.git
+git clone https://github.com/tcoatswo/greedbot-python-sdk.git
 cd greedbot-python-sdk
 pip install -e .
 ```
+
+*(Note: To publish this package to PyPI under `pip install greedbot`, build the distribution wheel with `python -m build` and upload via `twine upload dist/*` with your PyPI credentials).*
 
 ---
 
@@ -105,4 +108,4 @@ greedbot scan
 ---
 
 ## 📄 License
-MIT License. Open-source and free for developers building automated trading systems.
+MIT License.

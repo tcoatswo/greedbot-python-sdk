@@ -1,6 +1,6 @@
 """
 GreedBot Python SDK
-Official client library for GreedBot Quantitative Momentum, Sizing, and Volatility APIs.
+Community-maintained Python client library for GreedBot Quantitative Momentum, Sizing, and Volatility APIs.
 """
 
 from .client import GreedBotClient

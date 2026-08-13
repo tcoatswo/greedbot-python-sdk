@@ -5,9 +5,9 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "greedbot"
 version = "1.0.0"
-description = "Official Python SDK and CLI for GreedBot Quantitative Trading & Volatility Intelligence API"
+description = "Community Python SDK and CLI for GreedBot Quantitative Trading & Volatility Intelligence API"
 readme = "README.md"
-authors = [{ name = "GreedBot", email = "support@greedbot.com" }]
+authors = [{ name = "Community Contributor" }]
 license = { text = "MIT" }
 classifiers = [
     "Programming Language :: Python :: 3",
@@ -41,4 +41,4 @@ greedbot = "greedbot.cli:main"
 [project.urls]
 Homepage = "https://greedbot.com"
 Documentation = "https://greedbot.com/api/v1/docs"
-Repository = "https://github.com/greedbot/greedbot-python-sdk"
+Repository = "https://github.com/tcoatswo/greedbot-python-sdk"
