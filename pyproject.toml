@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "greedbot"
+version = "1.0.0"
+description = "Official Python SDK and CLI for GreedBot Quantitative Trading & Volatility Intelligence API"
+readme = "README.md"
+authors = [{ name = "GreedBot", email = "support@greedbot.com" }]
+license = { text = "MIT" }
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Office/Business :: Financial :: Investment",
+]
+requires-python = ">=3.9"
+dependencies = [
+    "requests>=2.28.0",
+    "rich>=13.0.0",
+    "tabulate>=0.9.0",
+    "yfinance>=0.2.30",
+    "numpy>=1.20.0"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "black>=23.0.0",
+    "flake8>=6.0.0"
+]
+
+[project.scripts]
+greedbot = "greedbot.cli:main"
+
+[project.urls]
+Homepage = "https://greedbot.com"
+Documentation = "https://greedbot.com/api/v1/docs"
+Repository = "https://github.com/greedbot/greedbot-python-sdk"

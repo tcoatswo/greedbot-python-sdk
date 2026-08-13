@@ -1,0 +1,23 @@
+"""
+GreedBot Python SDK
+Official client library for GreedBot Quantitative Momentum, Sizing, and Volatility APIs.
+"""
+
+from .client import GreedBotClient
+from .strategies import (
+    OptionKellyEngine,
+    SectorSpilloverArb,
+    QualitativeOverlayEngine,
+    MacroRegimeMatrix,
+    VolatilityHarvestEngine,
+)
+
+__version__ = "1.0.0"
+__all__ = [
+    "GreedBotClient",
+    "OptionKellyEngine",
+    "SectorSpilloverArb",
+    "QualitativeOverlayEngine",
+    "MacroRegimeMatrix",
+    "VolatilityHarvestEngine",
+]
