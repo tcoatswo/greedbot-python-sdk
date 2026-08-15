@@ -1,51 +1,54 @@
 """
-GreedBot SDK Quickstart & Usage Examples
-----------------------------------------
-Run this script to test all core features of the GreedBot Python SDK.
-
-Usage:
-    export GREEDBOT_API_KEY="your_api_key_here"  # Optional if using public demo endpoints
-    python examples/quickstart.py
+GreedBot Python SDK - Quickstart
+--------------------------------
+Demonstrates core client methods, receipt/baked computation, hub snapshots,
+bot fleet inspection, and unmetered health/spend endpoints.
 """
 
 import os
-import json
-from greedbot import GreedBotClient
-from greedbot.strategies import (
-    OptionKellyEngine,
-    QualitativeOverlayEngine,
-    MacroRegimeMatrix,
-    VolatilityHarvestEngine,
-    SectorSpilloverArb,
-)
+from greedbot import GreedBotClient, SlotInfo
 
 def main():
-    print("⚡ Initializing GreedBot Client...")
-    client = GreedBotClient(api_key=os.environ.get("GREEDBOT_API_KEY", ""))
+    # Initialize client (uses GREEDBOT_API_KEY from env or default)
+    client = GreedBotClient()
+    print(f"Initialized client: {client}")
 
-    print("\n1️⃣ Fetching Momentum Leaderboard (Pizza Index)...")
+    # 1. Health check (Free)
     try:
-        pizza = client.get_pizza(["NVDA", "TSLA", "MSFT", "AAPL"])
-        print(f"Top Tickers: {json.dumps(pizza, indent=2)}")
+        ping_res = client.ping()
+        print(f"Health check: {ping_res}")
     except Exception as e:
-        print(f"[-] Note: {e}")
+        print(f"Ping failed: {e}")
 
-    print("\n2️⃣ Running Qualitative Catalyst vs Expected Move Asymmetry...")
-    qual = QualitativeOverlayEngine(client)
-    nvda_signal = qual.evaluate_divergence(ticker="NVDA", qualitative_sentiment=0.85)
-    print(f"NVDA Analysis: {json.dumps(nvda_signal, indent=2)}")
+    # 2. Spend & Usage check (Free)
+    try:
+        usage = client.get_usage()
+        print(f"Usage summary: Key {usage.get('key', {}).get('api_key_id')} - Total events: {usage.get('key', {}).get('total_events')}")
+    except Exception as e:
+        print(f"Usage check: {e}")
 
-    print("\n3️⃣ Sizing Trade via Non-Linear Kelly Option Convexity...")
-    kelly = OptionKellyEngine(client)
-    sizing = kelly.calculate_sizing(ticker="NVDA", portfolio_size=25000.0)
-    print(f"NVDA Kelly Sizing: {json.dumps(sizing, indent=2)}")
+    # 3. Macro Regime Snapshot
+    try:
+        macro = client.get_hub_macro()
+        print(f"Active Macro Regime: {macro.get('regime', 'N/A')}")
+    except Exception as e:
+        print(f"Macro hub fetch: {e}")
 
-    print("\n4️⃣ Macro Dynamic Regime-Switching Matrix...")
-    macro = MacroRegimeMatrix(client)
-    weights = macro.get_portfolio_weights(tickers=["NVDA", "MSFT", "AMZN", "AAPL"], portfolio_capital=100000.0)
-    print(f"Macro Allocations: {json.dumps(weights, indent=2)}")
+    # 4. Earnings Expected Move
+    try:
+        exp = client.get_hub_earnings_expected_move(ticker="NVDA")
+        print(f"NVDA Options Market Expected Move: ±{exp.get('expected_move_pct')}%")
+    except Exception as e:
+        print(f"Expected move fetch: {e}")
 
-    print("\n✅ Quickstart demonstration completed successfully!")
+    # 5. Currency Check Demonstration
+    try:
+        ideas = client.get_hub_when_current("ideas", max_attempts=1, retry_secs=5)
+        slot = SlotInfo.from_payload(ideas)
+        if slot:
+            print(f"Current Ideas Slot: {slot.year}/{slot.refresh_n} (Effective: {slot.effective_at} -> {slot.effective_until})")
+    except Exception as e:
+        print(f"Slot freshness check: {e}")
 
 if __name__ == "__main__":
     main()

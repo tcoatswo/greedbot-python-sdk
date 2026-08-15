@@ -1,4 +1,4 @@
-"""Basic smoke test for GreedBot SDK using standard unittest."""
+"""Basic smoke tests for GreedBot SDK."""
 import unittest
 from greedbot import GreedBotClient
 from greedbot.strategies import (
@@ -7,6 +7,10 @@ from greedbot.strategies import (
     QualitativeOverlayEngine,
     MacroRegimeMatrix,
     VolatilityHarvestEngine,
+    ETFBarbellStrategy,
+    SoloTacticalStrategy,
+    SectorLongShortStrategy,
+    BotFleetFollower,
 )
 
 class TestGreedBotSDK(unittest.TestCase):
@@ -22,12 +26,20 @@ class TestGreedBotSDK(unittest.TestCase):
         qual = QualitativeOverlayEngine(client)
         macro = MacroRegimeMatrix(client)
         vol = VolatilityHarvestEngine(client)
+        etf = ETFBarbellStrategy()
+        solo = SoloTacticalStrategy()
+        sector_ls = SectorLongShortStrategy()
+        follower = BotFleetFollower()
         
         self.assertIsNotNone(kelly)
         self.assertIsNotNone(spill)
         self.assertIsNotNone(qual)
         self.assertIsNotNone(macro)
         self.assertIsNotNone(vol)
+        self.assertIsNotNone(etf)
+        self.assertIsNotNone(solo)
+        self.assertIsNotNone(sector_ls)
+        self.assertIsNotNone(follower)
 
 if __name__ == "__main__":
     unittest.main()
