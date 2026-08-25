@@ -10,8 +10,10 @@ from __future__ import annotations
 
 import math
 from typing import Any, Dict, List, Optional, Union
+import numpy as np
 from ..client import GreedBotClient
 from ..models import BotRunResult, OrderIntent, Side
+from ..quant.jump_kelly import compute_jump_kelly
 from .base import Strategy
 
 
@@ -84,19 +86,38 @@ class OptionKellyEngine(Strategy):
         except Exception:
             expected_move_pct = 5.0
 
-        # 3. Calculate convex option risk budget (capped at portfolio fraction)
-        fraction = max(0.05, min(abs(float(kelly_val)), 1.0))
-        risk_budget = round(portfolio_size * (fraction * self.max_risk_budget_pct), 2)
+        # 3. Calculate convex option risk budget via Merton Jump-Diffusion Kelly Engine
+        try:
+            f_star_arr = compute_jump_kelly(
+                S=np.array([100.0]),
+                O=np.array([max(0.10, 100.0 * (expected_move_pct / 100.0))]),
+                delta=np.array([0.30 if kelly_val >= 0 else -0.30]),
+                gamma=np.array([0.04]),
+                theta=np.array([-0.05]),
+                sigma=np.array([0.30]),
+                mu=0.05,
+                lambda_jump=1.5,
+                mu_J=0.10,
+                sigma_J=0.20,
+                gamma_penalty=1.5,
+            )
+            jump_f = float(f_star_arr[0])
+        except Exception:
+            jump_f = 0.15 * max(0.05, min(abs(float(kelly_val)), 1.0))
+
+        effective_fraction = jump_f if jump_f > 0 else (0.10 * max(0.05, min(abs(float(kelly_val)), 1.0)))
+        risk_budget = round(portfolio_size * min(effective_fraction, self.max_risk_budget_pct), 2)
         direction = "CALL" if kelly_val >= 0 else "PUT"
 
         return {
             "ticker": sym.upper(),
-            "kelly_conviction": round(fraction, 4),
+            "kelly_conviction": round(effective_fraction, 4),
             "portfolio_size": portfolio_size,
             "max_risk_budget": risk_budget,
             "expected_move_pct": round(expected_move_pct, 2),
             "structure": "OUT_OF_THE_MONEY_SINGLE",
             "direction": direction,
+            "engine": "Merton Jump-Diffusion Gauss-Hermite",
             "recommended_action": f"Buy OTM {direction} with max premium risk capped at ${risk_budget:.2f}",
         }
 
