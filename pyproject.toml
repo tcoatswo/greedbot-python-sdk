@@ -38,6 +38,9 @@ dev = [
 [project.scripts]
 greedbot = "greedbot.cli:main"
 
+[tool.setuptools.packages.find]
+include = ["greedbot*"]
+
 [project.urls]
 Homepage = "https://greedbot.com"
 Documentation = "https://greedbot.com/api-docs"
