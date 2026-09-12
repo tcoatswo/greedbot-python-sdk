@@ -28,6 +28,12 @@ from .exits import (
 )
 from .broker import Broker, PaperBroker
 from .adapters import AlpacaBrokerAdapter, TradierBrokerAdapter
+from .paper_engine import InstitutionalPaperBroker, PaperPosition
+from .fly_trader import (
+    DrosophilaConnectomeTrader,
+    ConnectomeSensoryInput,
+    FlyMotorDecision,
+)
 from .dataframe import (
     map_from_df,
     ranking_from_pizza,
@@ -102,7 +108,7 @@ from .strategies import (
     MarkowitzAllocationStrategy,
 )
 
-__version__ = "1.4.0"
+__version__ = "1.5.0"
 
 __all__ = [
     # Core Clients
@@ -124,11 +130,17 @@ __all__ = [
     "ChandelierExit",
     "TrailingStopManager",
     "PositionExitStatus",
-    # Brokers & Turnkey Adapters
+    # Brokers & Execution Engines
     "Broker",
     "PaperBroker",
+    "InstitutionalPaperBroker",
+    "PaperPosition",
     "AlpacaBrokerAdapter",
     "TradierBrokerAdapter",
+    # Biological Fly Trader
+    "DrosophilaConnectomeTrader",
+    "ConnectomeSensoryInput",
+    "FlyMotorDecision",
     # Dataframe Helpers
     "map_from_df",
     "ranking_from_pizza",
