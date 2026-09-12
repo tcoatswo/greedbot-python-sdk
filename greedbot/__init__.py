@@ -56,7 +56,13 @@ from .signals import (
 )
 from .quant import (
     KellyPositionSizer,
+    MertonJumpKellySizer,
     MeanVarianceOptimizer,
+    OptionGreeks,
+    calculate_greeks,
+    solve_iv,
+    generate_volatility_surface,
+    is_rust_accelerated,
 )
 from .backtest import (
     PerformanceMetrics,
@@ -82,7 +88,7 @@ from .strategies import (
     MarkowitzAllocationStrategy,
 )
 
-__version__ = "1.2.0"
+__version__ = "1.3.0"
 
 __all__ = [
     # Core Clients
@@ -135,7 +141,13 @@ __all__ = [
     "AvellanedaStoikovMarketMaker",
     # Quant Math & Portfolio Optimization
     "KellyPositionSizer",
+    "MertonJumpKellySizer",
     "MeanVarianceOptimizer",
+    "OptionGreeks",
+    "calculate_greeks",
+    "solve_iv",
+    "generate_volatility_surface",
+    "is_rust_accelerated",
     # Backtesting Engine & Metrics
     "PerformanceMetrics",
     "BacktestEngine",
