@@ -1,7 +1,7 @@
 """
 GreedBot Python SDK
 -------------------
-Official community Python SDK for the GreedBot Quantitative Trading & Volatility Intelligence API.
+Unofficial community Python SDK for the GreedBot Quantitative Trading & Volatility Intelligence API.
 """
 
 from .client import (

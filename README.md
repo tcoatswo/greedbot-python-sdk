@@ -1,11 +1,11 @@
-# GreedBot Python SDK & High-Throughput Quant Engine
+# GreedBot Unofficial Python SDK & High-Throughput Quant Engine
 
 [![PyPI Version](https://img.shields.io/badge/pypi-v1.3.0-blue.svg)](https://pypi.org/project/greedbot/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Rust Core](https://img.shields.io/badge/Rust-Accelerated-orange.svg)](crates/greedbot_quant)
 [![Speed](https://img.shields.io/badge/Latency-168ns-brightgreen.svg)]()
 
-The official Python SDK and high-performance quantitative toolkit for **GreedBot** — featuring sub-microsecond options Greeks, Newton-Raphson IV solvers, Merton Jump-Diffusion Kelly position sizing, and volatility surface modeling.
+The unofficial community Python SDK and high-performance quantitative toolkit for **GreedBot** — featuring sub-microsecond options Greeks, Newton-Raphson IV solvers, Merton Jump-Diffusion Kelly position sizing, and volatility surface modeling.
 
 ---
 
