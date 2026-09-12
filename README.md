@@ -1,6 +1,5 @@
 # GreedBot Unofficial Python SDK & High-Throughput Quant Engine
 
-[![PyPI Version](https://img.shields.io/badge/pypi-v1.3.0-blue.svg)](https://pypi.org/project/greedbot/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Rust Core](https://img.shields.io/badge/Rust-Accelerated-orange.svg)](crates/greedbot_quant)
 [![Speed](https://img.shields.io/badge/Latency-168ns-brightgreen.svg)]()
@@ -26,15 +25,23 @@ Under the hood, `greedbot` compiles a native SIMD-accelerated Rust backend (`cra
 
 ## 📦 Installation
 
+### Direct Install via Git (No Pre-requisites)
 ```bash
-pip install greedbot
+pip install git+https://github.com/tcoatswo/greedbot-python-sdk.git
 ```
 
-To build from source with the native Rust acceleration:
+### Build from Source with Native Rust Acceleration
+To compile the high-throughput native Rust engine locally:
+
 ```bash
+# 1. Clone the repository
 git clone https://github.com/tcoatswo/greedbot-python-sdk.git
 cd greedbot-python-sdk
+
+# 2. Compile the Rust quant engine
 cargo build --release --manifest-path crates/greedbot_quant/Cargo.toml
+
+# 3. Install in editable mode
 pip install -e .
 ```
 
