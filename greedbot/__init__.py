@@ -1,7 +1,7 @@
 """
 GreedBot Python SDK
 -------------------
-Unofficial community Python SDK for the GreedBot Quantitative Trading & Volatility Intelligence API.
+Unofficial community Python SDK and Quantitative Toolkit for the GreedBot Trading & Volatility Intelligence API.
 """
 
 from .client import (
@@ -27,6 +27,7 @@ from .exits import (
     PositionExitStatus,
 )
 from .broker import Broker, PaperBroker
+from .adapters import AlpacaBrokerAdapter, TradierBrokerAdapter
 from .dataframe import (
     map_from_df,
     ranking_from_pizza,
@@ -63,7 +64,20 @@ from .quant import (
     solve_iv,
     generate_volatility_surface,
     is_rust_accelerated,
+    GEXEngine,
+    GEXResult,
+    OptionContractData,
+    OptionLeg,
+    OptionSpread,
+    IronCondor,
+    VerticalSpread,
+    Straddle,
+    Strangle,
+    CompositeSpreadGreeks,
+    MonteCarloEngine,
+    MonteCarloResult,
 )
+from .dashboard import print_terminal_dashboard, get_streamlit_app_code
 from .backtest import (
     PerformanceMetrics,
     BacktestEngine,
@@ -88,7 +102,7 @@ from .strategies import (
     MarkowitzAllocationStrategy,
 )
 
-__version__ = "1.3.0"
+__version__ = "1.4.0"
 
 __all__ = [
     # Core Clients
@@ -110,9 +124,11 @@ __all__ = [
     "ChandelierExit",
     "TrailingStopManager",
     "PositionExitStatus",
-    # Broker
+    # Brokers & Turnkey Adapters
     "Broker",
     "PaperBroker",
+    "AlpacaBrokerAdapter",
+    "TradierBrokerAdapter",
     # Dataframe Helpers
     "map_from_df",
     "ranking_from_pizza",
@@ -143,11 +159,30 @@ __all__ = [
     "KellyPositionSizer",
     "MertonJumpKellySizer",
     "MeanVarianceOptimizer",
+    # Rust Options Greeks & Volatility
     "OptionGreeks",
     "calculate_greeks",
     "solve_iv",
     "generate_volatility_surface",
     "is_rust_accelerated",
+    # Market-Maker GEX & Max Pain
+    "GEXEngine",
+    "GEXResult",
+    "OptionContractData",
+    # Multi-Leg Spreads
+    "OptionLeg",
+    "OptionSpread",
+    "IronCondor",
+    "VerticalSpread",
+    "Straddle",
+    "Strangle",
+    "CompositeSpreadGreeks",
+    # Monte Carlo & Stress-Testing
+    "MonteCarloEngine",
+    "MonteCarloResult",
+    # Dashboard & Visuals
+    "print_terminal_dashboard",
+    "get_streamlit_app_code",
     # Backtesting Engine & Metrics
     "PerformanceMetrics",
     "BacktestEngine",

@@ -1,0 +1,14 @@
+/home/ssm-user/clawd/greedbot-python-sdk/crates/greedbot_quant/target/release/deps/serde-41968e4b27c36f2f.d: /home/ssm-user/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/lib.rs /home/ssm-user/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/integer128.rs /home/ssm-user/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/mod.rs /home/ssm-user/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/de.rs /home/ssm-user/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/ser.rs /home/ssm-user/clawd/greedbot-python-sdk/crates/greedbot_quant/target/release/build/serde-a942c094243c180d/out/private.rs
+
+/home/ssm-user/clawd/greedbot-python-sdk/crates/greedbot_quant/target/release/deps/libserde-41968e4b27c36f2f.rlib: /home/ssm-user/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/lib.rs /home/ssm-user/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/integer128.rs /home/ssm-user/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/mod.rs /home/ssm-user/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/de.rs /home/ssm-user/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/ser.rs /home/ssm-user/clawd/greedbot-python-sdk/crates/greedbot_quant/target/release/build/serde-a942c094243c180d/out/private.rs
+
+/home/ssm-user/clawd/greedbot-python-sdk/crates/greedbot_quant/target/release/deps/libserde-41968e4b27c36f2f.rmeta: /home/ssm-user/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/lib.rs /home/ssm-user/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/integer128.rs /home/ssm-user/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/mod.rs /home/ssm-user/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/de.rs /home/ssm-user/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/ser.rs /home/ssm-user/clawd/greedbot-python-sdk/crates/greedbot_quant/target/release/build/serde-a942c094243c180d/out/private.rs
+
+/home/ssm-user/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/lib.rs:
+/home/ssm-user/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/integer128.rs:
+/home/ssm-user/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/mod.rs:
+/home/ssm-user/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/de.rs:
+/home/ssm-user/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.229/src/private/ser.rs:
+/home/ssm-user/clawd/greedbot-python-sdk/crates/greedbot_quant/target/release/build/serde-a942c094243c180d/out/private.rs:
+
+# env-dep:OUT_DIR=/home/ssm-user/clawd/greedbot-python-sdk/crates/greedbot_quant/target/release/build/serde-a942c094243c180d/out

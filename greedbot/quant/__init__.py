@@ -1,11 +1,13 @@
 """
 GreedBot Quantitative & Risk Management Toolkit
 -----------------------------------------------
-Contains mathematical models for position sizing, risk controls, and portfolio optimization:
+Mathematical models for options pricing, dealer positioning, spreads, risk controls, and portfolio optimization:
 - Option Greeks & Implied Volatility (Native Rust Accelerated Engine)
-- KellyPositionSizer (Discrete, Continuous, Half-Kelly)
-- MertonJumpKellySizer (Merton Jump Diffusion Kelly)
-- MeanVarianceOptimizer (Markowitz GMV, Tangency Portfolio, Efficient Frontier)
+- Market-Maker Gamma Exposure (GEX) & Expiration Max Pain
+- Multi-Leg Options Spread Engine (Iron Condor, Verticals, Straddles, Strangles)
+- Monte Carlo Portfolio Stress-Testing & CVaR (Jump-Diffusion)
+- Kelly Position Sizing & Merton Jump Kelly
+- Mean-Variance Portfolio Optimization (Markowitz GMV & Tangency)
 """
 
 from .kelly import KellyPositionSizer
@@ -18,15 +20,43 @@ from .rust_engine import (
     generate_volatility_surface,
     is_rust_accelerated,
 )
+from .gex import GEXEngine, GEXResult, OptionContractData
+from .spreads import (
+    OptionLeg,
+    OptionSpread,
+    IronCondor,
+    VerticalSpread,
+    Straddle,
+    Strangle,
+    CompositeSpreadGreeks,
+)
+from .monte_carlo import MonteCarloEngine, MonteCarloResult
 
 __all__ = [
+    # Position Sizing & Portfolio Optimization
     "KellyPositionSizer",
     "MertonJumpKellySizer",
     "compute_jump_kelly",
     "MeanVarianceOptimizer",
+    # Rust Options Greeks & Volatility
     "OptionGreeks",
     "calculate_greeks",
     "solve_iv",
     "generate_volatility_surface",
     "is_rust_accelerated",
+    # GEX & Max Pain
+    "GEXEngine",
+    "GEXResult",
+    "OptionContractData",
+    # Multi-Leg Spreads
+    "OptionLeg",
+    "OptionSpread",
+    "IronCondor",
+    "VerticalSpread",
+    "Straddle",
+    "Strangle",
+    "CompositeSpreadGreeks",
+    # Monte Carlo & Stress-Testing
+    "MonteCarloEngine",
+    "MonteCarloResult",
 ]
