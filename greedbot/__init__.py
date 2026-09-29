@@ -60,6 +60,8 @@ from .signals import (
     BollingerMeanReversion,
     StatisticalArbitrageSpread,
     AvellanedaStoikovMarketMaker,
+    RSIMeanReversion,
+    MACDCrossover,
 )
 from .quant import (
     KellyPositionSizer,
@@ -82,6 +84,7 @@ from .quant import (
     CompositeSpreadGreeks,
     MonteCarloEngine,
     MonteCarloResult,
+    RiskParityOptimizer,
 )
 from .dashboard import print_terminal_dashboard, get_streamlit_app_code
 from .backtest import (
@@ -108,7 +111,7 @@ from .strategies import (
     MarkowitzAllocationStrategy,
 )
 
-__version__ = "1.5.0"
+__version__ = "1.5.1"
 
 __all__ = [
     # Core Clients
@@ -167,10 +170,13 @@ __all__ = [
     "BollingerMeanReversion",
     "StatisticalArbitrageSpread",
     "AvellanedaStoikovMarketMaker",
+    "RSIMeanReversion",
+    "MACDCrossover",
     # Quant Math & Portfolio Optimization
     "KellyPositionSizer",
     "MertonJumpKellySizer",
     "MeanVarianceOptimizer",
+    "RiskParityOptimizer",
     # Rust Options Greeks & Volatility
     "OptionGreeks",
     "calculate_greeks",

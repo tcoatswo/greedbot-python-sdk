@@ -1,17 +1,19 @@
 # GreedBot Unofficial Python SDK & High-Throughput Quant Engine
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![Rust Core](https://img.shields.io/badge/Rust-Accelerated-orange.svg)](crates/greedbot_quant)
-[![Speed](https://img.shields.io/badge/Latency-168ns-brightgreen.svg)]()
-[![Tests](https://img.shields.io/badge/Tests-91%20Passing-brightgreen.svg)]()
+[![Latency](https://img.shields.io/badge/Latency-168ns-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/Tests-112%20Passing-brightgreen.svg)]()
+[![Type Checked](https://img.shields.io/badge/type--checked-PEP%20561-blueviolet.svg)]()
 
-The unofficial community Python SDK and high-performance quantitative toolkit for **GreedBot** — featuring sub-microsecond options Greeks, Newton-Raphson IV solvers, Market-Maker Gamma Exposure (GEX), Multi-Leg Options Spreads, Monte Carlo Jump-Diffusion CVaR, Turnkey Broker Adapters (Alpaca & Tradier), Institutional Paper Broker, and the Drosophila Connectome Bio-Trader.
+The unofficial community Python SDK and high-performance quantitative toolkit for **GreedBot** — featuring sub-microsecond options Greeks, Newton-Raphson IV solvers, Market-Maker Gamma Exposure (GEX), Multi-Leg Options Spreads, Monte Carlo Jump-Diffusion CVaR, Risk Parity / ERC, RSI, MACD, Turnkey Broker Adapters (Alpaca & Tradier), Institutional Paper Broker with market microstructure slippage, and the Drosophila Connectome Bio-Trader.
 
 ---
 
 ## ⚡ Blazing-Fast Performance (Rust Engine)
 
-Under the hood, `greedbot` compiles a native SIMD-accelerated Rust backend (`crates/greedbot_quant`) capable of processing millions of option contracts per second with zero garbage collection overhead.
+Under the hood, `greedbot` provides a native SIMD-accelerated Rust backend (`crates/greedbot_quant`) capable of processing millions of option contracts per second with zero garbage collection overhead and an analytical pure-Python fallback.
 
 ### 🔥 Benchmark: 100,000 Option Contracts
 
@@ -68,7 +70,7 @@ print(res.summary())
 Construct multi-leg structures with composite Greeks, break-even points, and full payoff curves:
 
 ```python
-from greedbot import IronCondor, VerticalSpread, Straddle, Strangle
+from greedbot import IronCondor
 
 # Construct a 4-leg Iron Condor
 ic = IronCondor(
@@ -78,7 +80,7 @@ ic = IronCondor(
     call_short=595.0,
     call_wing=610.0,
     dte=30.0,
-    iv=0.20
+    iv=0.20,
 )
 
 greeks = ic.get_net_greeks(spot=580.0)
@@ -133,16 +135,118 @@ print(f"95% Expected Shortfall (CVaR): -${res.cvar_95_pct:,.2f}")
 
 ---
 
-### 5. 💻 Continuous Background Simulation Daemon
+### 5. 📐 Quantitative Signal Generators (`greedbot.signals`)
 
-Run continuous 24/7 background simulations logging to SQLite (`data/paper_trading.db`):
+- **Moving Average Crossover**: `MovingAverageCrossover(short_window=10, long_window=50)` triggers `LONG` on golden cross and `SHORT` on death cross.
+- **Time-Series Momentum**: `TimeSeriesMomentum(lookback_k=14, require_acceleration=True)` measures rate-of-change and second derivative velocity.
+- **Bollinger Mean Reversion**: `BollingerMeanReversion(window=20, z_threshold=2.0)` computes rolling z-scores with dynamic standard deviation bands.
+- **Statistical Arbitrage**: `StatisticalArbitrageSpread(ticker_a="SPY", ticker_b="QQQ")` dynamically estimates cointegrating hedge ratio $\beta$ via rolling OLS.
+- **Avellaneda-Stoikov Market Maker**: `AvellanedaStoikovMarketMaker(gamma=0.1, k=1.5)` quotes two-sided bid/ask orders with reservation price inventory shading.
+- **Relative Strength Index (RSI)**: `RSIMeanReversion(period=14, oversold_threshold=30.0, overbought_threshold=70.0)` with Wilder exponential smoothing.
+- **MACD Trend Momentum**: `MACDCrossover(fast_period=12, slow_period=26, signal_period=9)` with dual-EMA and histogram convergence/divergence.
+
+---
+
+### 6. 🧮 Risk Management & Quant Math (`greedbot.quant`)
+
+- **Kelly Criterion**: `KellyPositionSizer(default_fraction=0.50)` calculates optimal growth fraction $f^* = \frac{p(b+1) - 1}{b}$ and applies Half-Kelly.
+- **Merton Jump Kelly**: `MertonJumpKellySizer` calculates non-linear option convex sizing incorporating jump penalties and tail risk.
+- **Markowitz Mean-Variance Optimization**: `MeanVarianceOptimizer(risk_free_rate=0.04)` solves for Global Minimum Variance (GMV) and Maximum Sharpe Ratio (Tangency) portfolios.
+- **Risk Parity & Equal Risk Contribution (ERC)**: `RiskParityOptimizer()` calculates Inverse Volatility and exact Equal Risk Contribution allocations via cyclical coordinate descent.
+
+---
+
+### 7. 🛡 Dynamic Position Protection & Trailing Stops (`greedbot.exits`)
+
+- **ATR Chandelier Stop**: `ChandelierExit(atr_period=14, multiplier_k=3.0)` sets stop at $\text{Highest High} - 3 \times \text{ATR}_{14}$ (ratchets upward only for longs).
+- **R-Multiple Trailing Ratchet**: `TrailingStopManager(entry_price=100.0, initial_stop=95.0)` automatically moves stops to Breakeven at $+1.0R$, locks $+1.0R$ at $+2.0R$, and locks $+2.0R$ at $+3.0R$.
+
+---
+
+### 8. 📈 Event-Driven Backtesting & Analytics (`greedbot.backtest`)
+
+Simulate any strategy or signal generator with bar-by-bar execution, realistic transaction costs (slippage + commissions), and zero lookahead bias:
+
+```python
+from greedbot import BacktestEngine, MovingAverageCrossover
+
+engine = BacktestEngine(initial_capital=50000.0, slippage_bps=5.0, fee_per_trade=1.00)
+signal_gen = MovingAverageCrossover(short_window=10, long_window=30)
+result = engine.run_signal_series("NVDA", prices=[...], signal_generator=signal_gen)
+
+print(result.summary())
+```
+
+**Performance Tear Sheet Output:**
+- CAGR, Total Net Profit, Annualized Sharpe & Sortino Ratios
+- Max Drawdown (MDD) & Drawdown Duration
+- Calmar Ratio, Win Rate, Profit Factor, and Payoff Ratio ($b$)
+- Historical Value at Risk (VaR 95% & 99%)
+- Conditional Value at Risk (CVaR / Expected Shortfall 95% & 99%)
+- Benchmark Relative Metrics: Jensen's Alpha, Beta, Treynor Ratio, and Information Ratio (IR)
+
+---
+
+### 9. 📢 Multi-Channel Webhook Alerts (`greedbot.alerts`)
+
+Dispatch real-time alerts to Discord, Slack, Telegram, or generic webhooks:
+
+```python
+from greedbot import OrderIntent, Side, WebhookDispatcher
+
+dispatcher = WebhookDispatcher(discord_url="...", slack_url="...")
+dispatcher.send_trade_alert(
+    intent=OrderIntent(ticker="NVDA", side=Side.BUY, dollars=10000.0, limit=124.50),
+    strategy_name="TrendFollowingStrategy",
+    current_price=124.20,
+    rationale="10/50 Golden Cross Breakout",
+)
+```
+
+---
+
+## 💻 CLI Reference
 
 ```bash
-# Run continuous background simulation fleet
-python scripts/run_continuous_paper_fleet.py --continuous --interval 1.0
+# Health & Spend
+greedbot ping
+greedbot usage
 
-# Run terminal quant & visual dashboard
-greedbot dashboard --spot 580.0
+# Quantitative Endpoints
+greedbot targets NVDA TSLA
+greedbot kelly AAPL MSFT --fraction 0.5
+greedbot parity XLK XLE XLF
+greedbot pizza XLK XLE XLF
+greedbot macro
+greedbot earnings
+greedbot expected-move NVDA
+
+# Standalone Quant Math
+greedbot quant kelly --win-rate 0.60 --win-loss-ratio 2.0 --capital 50000
+greedbot quant markowitz --capital 100000
+greedbot quant risk-parity --capital 100000
+
+# Options Analytics & Greeks
+greedbot greeks --spot 580 --strike 580 --dte 30 --iv 0.20
+greedbot solve-iv --spot 580 --strike 580 --price 12.50 --dte 30
+greedbot gex --spot 580
+greedbot spread --type iron-condor --spot 580
+greedbot mc --capital 100000 --days 30 --sims 5000
+greedbot dashboard --spot 580
+
+# Event-Driven Backtesting
+greedbot backtest trend --ticker NVDA
+greedbot backtest rsi --ticker AAPL
+greedbot backtest macd --ticker TSLA
+greedbot backtest mean_revert --ticker SPY --json
+
+# Automated Strategy Runs
+greedbot run-strategy trend --ticker NVDA
+greedbot run-strategy mean_revert --ticker SPY
+greedbot run-strategy pairs --ticker SPY --ticker2 QQQ
+greedbot run-strategy mm --ticker NVDA
+greedbot run-strategy markowitz --capital 100000
+greedbot run-strategy etf --capital 25000
 ```
 
 ---
@@ -150,10 +254,10 @@ greedbot dashboard --spot 580.0
 ## 🧪 Testing & Verification
 
 ```bash
-python -m unittest discover tests/ -v
+.venv/bin/pytest -v
 ```
 
-All **91 unit tests** run in ~1.1 seconds across Python 3.9, 3.10, 3.11, and 3.12.
+**112 unit tests passing** across 27 test modules covering all endpoints, mathematical formulations, backtesting simulation, risk firewalls, broker accounting, exits, options Greeks, GEX, Monte Carlo, and connectome bio-traders.
 
 ---
 

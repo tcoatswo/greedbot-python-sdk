@@ -7,15 +7,10 @@ and strict avoidance of lookahead bias.
 
 from __future__ import annotations
 
-import math
 from dataclasses import dataclass, field
-from datetime import datetime
 from typing import Any, Dict, List, Optional, Sequence
-import numpy as np
 
-from ..models import OrderIntent, Side
 from ..signals.base import Signal, SignalDirection, SignalGenerator
-from ..strategies.base import Strategy
 from .metrics import PerformanceMetrics
 
 
@@ -59,6 +54,7 @@ class BacktestEngine:
         signal_generator: SignalGenerator,
         min_warmup_bars: int = 20,
         allocation_fraction: float = 0.50,
+        benchmark_prices: Optional[Sequence[float]] = None,
     ) -> BacktestResult:
         """
         Backtest a SignalGenerator bar-by-bar on historical close prices.
@@ -97,7 +93,7 @@ class BacktestEngine:
                 if position_shares < 0:
                     fill_price = next_price * (1.0 + slippage_mult)
                     pnl = (avg_entry_price - fill_price) * abs(position_shares) - self.fee_per_trade
-                    cash += (abs(position_shares) * avg_entry_price) + pnl
+                    cash -= (abs(position_shares) * fill_price + self.fee_per_trade)
                     trades.append({"type": "COVER", "price": fill_price, "shares": abs(position_shares), "pnl": pnl})
                     position_shares = 0.0
 
@@ -139,8 +135,10 @@ class BacktestEngine:
                 elif position_shares < 0:
                     fill_price = next_price * (1.0 + slippage_mult)
                     pnl = (avg_entry_price - fill_price) * abs(position_shares) - self.fee_per_trade
-                    cash += (abs(position_shares) * avg_entry_price) + pnl
-                    trades.append({"type": "FLAT_COVER", "price": fill_price, "shares": abs(position_shares), "pnl": pnl})
+                    cash -= (abs(position_shares) * fill_price + self.fee_per_trade)
+                    trades.append(
+                        {"type": "FLAT_COVER", "price": fill_price, "shares": abs(position_shares), "pnl": pnl}
+                    )
                     position_shares = 0.0
 
         # Close position at the final bar to compute realized P&L
@@ -151,16 +149,27 @@ class BacktestEngine:
             trades.append({"type": "FINAL_CLOSE", "price": final_price, "shares": position_shares, "pnl": pnl})
         elif position_shares < 0:
             pnl = (avg_entry_price - final_price) * abs(position_shares) - self.fee_per_trade
-            cash += (abs(position_shares) * avg_entry_price) + pnl
+            cash -= (abs(position_shares) * final_price + self.fee_per_trade)
             trades.append({"type": "FINAL_CLOSE", "price": final_price, "shares": abs(position_shares), "pnl": pnl})
 
         equity_curve.append(cash)
+
+        # Slice benchmark prices to match active simulation window if provided
+        aligned_benchmark: Optional[List[float]] = None
+        if benchmark_prices is not None:
+            # benchmark matches bars from min_warmup_bars to n_bars
+            bench_list = [float(b) for b in benchmark_prices]
+            if len(bench_list) >= n_bars:
+                aligned_benchmark = bench_list[min_warmup_bars:n_bars]
+            else:
+                aligned_benchmark = bench_list
 
         metrics = PerformanceMetrics.calculate(
             equity_curve=equity_curve,
             trades=trades,
             risk_free_rate=self.risk_free_rate,
             bars_per_year=self.bars_per_year,
+            benchmark_prices=aligned_benchmark,
         )
 
         return BacktestResult(

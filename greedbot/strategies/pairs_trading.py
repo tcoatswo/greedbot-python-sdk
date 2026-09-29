@@ -63,8 +63,6 @@ class StatArbPairsStrategy(Strategy):
         prices_a: Optional[Sequence[float]] = None,
         prices_b: Optional[Sequence[float]] = None,
     ) -> BotRunResult:
-        cli = client or self.client or GreedBotClient()
-
         if prices_a is None or prices_b is None:
             # Synthetic cointegrated series with a transient divergence
             prices_b = [100.0 + i * 0.2 + math.sin(i / 4.0) * 1.5 for i in range(70)]

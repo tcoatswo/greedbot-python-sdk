@@ -7,7 +7,6 @@ to earn the bid-ask spread while dynamically managing inventory risk.
 
 from __future__ import annotations
 
-import math
 from typing import Any, Dict, List, Optional
 from ..client import GreedBotClient
 from ..models import BotRunResult, OrderIntent, Side

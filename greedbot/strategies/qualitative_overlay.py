@@ -8,8 +8,7 @@ asymmetric volatility mispricings.
 
 from __future__ import annotations
 
-import math
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, Optional, Union
 from ..client import GreedBotClient
 from ..models import BotRunResult, OrderIntent, Side
 from .base import Strategy

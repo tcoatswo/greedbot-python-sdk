@@ -162,6 +162,32 @@ class TestStrategies(unittest.TestCase):
         self.assertIn("nvda", res.target_dollars)
         self.assertIn("aapl", res.target_dollars)
 
+    def test_earnings_radar_strategy(self):
+        self.mock_client.get_hub_earnings.return_value = {
+            "reports": [
+                {"ticker": "NVDA", "window": "next-7-bd", "report_date": "2026-10-15"},
+                {"ticker": "TSLA", "window": "next-30-bd", "report_date": "2026-10-25"},
+            ]
+        }
+        self.mock_client.get_hub_earnings_expected_move.return_value = {
+            "expected_move_pct": 8.5,
+            "straddle_price": 12.50,
+        }
+        self.mock_client.get_rebalance.return_value = {
+            "trades": [],
+            "summary": {"cost": 0.0},
+        }
+
+        strat = EarningsRadarStrategy(target_window="next-7-bd")
+        candidates = strat.scan_radar(self.mock_client)
+        self.assertEqual(len(candidates), 1)
+        self.assertEqual(candidates[0]["ticker"], "NVDA")
+        self.assertEqual(candidates[0]["expected_move_pct"], 8.5)
+
+        run_res = strat.run(self.mock_client, capital_usd=10000.0)
+        self.assertTrue(len(run_res.intents) > 0)
+
 
 if __name__ == "__main__":
     unittest.main()
+

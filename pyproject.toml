@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "greedbot"
-version = "1.2.0"
+version = "1.3.0"
 description = "Community Python SDK and CLI for GreedBot Quantitative Trading & Volatility Intelligence API"
 readme = "README.md"
 authors = [{ name = "Community Contributor" }]

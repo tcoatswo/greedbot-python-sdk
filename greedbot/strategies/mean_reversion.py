@@ -69,8 +69,6 @@ class MeanReversionStrategy(Strategy):
         capital_usd: float = 10000.0,
         prices: Optional[Sequence[float]] = None,
     ) -> BotRunResult:
-        cli = client or self.client or GreedBotClient()
-
         if prices is None:
             # Sample prices exhibiting mean-reverting sinusoidal oscillation
             prices = [100.0 + math.sin(i / 3.0) * 8.0 for i in range(40)]

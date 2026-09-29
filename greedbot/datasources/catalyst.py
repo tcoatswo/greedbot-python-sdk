@@ -7,10 +7,7 @@ earnings release transcripts, and financial news to feed the qualitative LLM lay
 
 from __future__ import annotations
 
-import json
 import logging
-import urllib.request
-from typing import Any, Dict, List, Optional
 from .base import DataSource
 
 logger = logging.getLogger("greedbot.datasources.catalyst")

@@ -7,8 +7,7 @@ and rolling spread Z-scores for market-neutral pairs trading.
 
 from __future__ import annotations
 
-import math
-from typing import Any, Dict, Optional, Sequence, Tuple
+from typing import Any, Dict, Sequence, Tuple
 import numpy as np
 
 from .base import Signal, SignalDirection, SignalGenerator

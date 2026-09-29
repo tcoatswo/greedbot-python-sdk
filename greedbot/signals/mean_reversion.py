@@ -6,8 +6,7 @@ Implements Bollinger Bands, Rolling Mean & Standard Deviation, and Z-Score stati
 
 from __future__ import annotations
 
-import math
-from typing import Any, Dict, Optional, Sequence
+from typing import Dict, Sequence
 import numpy as np
 
 from .base import Signal, SignalDirection, SignalGenerator

@@ -7,8 +7,7 @@ Bonds, and Defensive Cash based on macroeconomic cycle indicators from /hub/macr
 
 from __future__ import annotations
 
-import math
-from typing import Any, Dict, List, Optional, Sequence, Union
+from typing import Any, Dict, List, Optional, Union
 from ..client import GreedBotClient
 from ..models import BotRunResult, OrderIntent, Side
 from .base import Strategy

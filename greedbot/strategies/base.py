@@ -7,9 +7,8 @@ Defines the `Strategy` abstract base class for all algorithmic trading models.
 from __future__ import annotations
 
 import abc
-from typing import Any, Dict, List
 from ..client import GreedBotClient
-from ..models import BotRunResult, OrderIntent
+from ..models import BotRunResult
 
 
 class Strategy(abc.ABC):

@@ -8,7 +8,7 @@ and limit bid/ask generation.
 from __future__ import annotations
 
 import math
-from typing import Any, Dict, Optional
+from typing import Dict, Optional
 from .base import Signal, SignalDirection, SignalGenerator
 
 

@@ -7,10 +7,8 @@ and time-based exit managers for live and paper trading bots.
 
 from __future__ import annotations
 
-import math
-from dataclasses import dataclass, field
-from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional, Sequence
+from dataclasses import dataclass
+from typing import Optional, Sequence
 import numpy as np
 
 
@@ -57,12 +55,12 @@ class ChandelierExit:
 
         p = min(period, n - 1)
         h = np.array(highs[-p:], dtype=float)
-        l = np.array(lows[-p:], dtype=float)
+        lo = np.array(lows[-p:], dtype=float)
         prev_c = np.array(closes[-p - 1 : -1], dtype=float)
 
-        tr1 = h - l
+        tr1 = h - lo
         tr2 = np.abs(h - prev_c)
-        tr3 = np.abs(l - prev_c)
+        tr3 = np.abs(lo - prev_c)
 
         tr = np.maximum(tr1, np.maximum(tr2, tr3))
         return float(np.mean(tr))

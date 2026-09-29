@@ -14,7 +14,6 @@ from greedbot.quant.spreads import (
     VerticalSpread,
     Straddle,
     Strangle,
-    OptionLeg,
     CompositeSpreadGreeks,
 )
 from greedbot.quant.monte_carlo import MonteCarloEngine, MonteCarloResult

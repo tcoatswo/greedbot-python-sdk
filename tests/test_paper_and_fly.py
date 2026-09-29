@@ -5,11 +5,9 @@ Unit tests for InstitutionalPaperBroker and DrosophilaConnectomeTrader in GreedB
 import os
 import tempfile
 import unittest
-import numpy as np
-
-from greedbot.paper_engine import InstitutionalPaperBroker, PaperPosition
+from greedbot.paper_engine import InstitutionalPaperBroker
 from greedbot.fly_trader import DrosophilaConnectomeTrader, ConnectomeSensoryInput, FlyMotorDecision
-from greedbot.models import Side, OrderIntent
+from greedbot.models import Side
 
 
 class TestPaperAndFlyTrader(unittest.TestCase):

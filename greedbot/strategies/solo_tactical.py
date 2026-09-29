@@ -9,7 +9,7 @@ signals into 100% Cash (FLAT), preventing churn on noisy signals.
 from __future__ import annotations
 
 import math
-from typing import Any, Dict, List, Optional, Sequence
+from typing import List, Optional, Sequence
 from ..client import GreedBotClient
 from ..dataframe import extract_signal
 from ..models import BotRunResult, OrderIntent, Side

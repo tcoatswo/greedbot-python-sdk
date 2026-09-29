@@ -18,12 +18,11 @@ import os
 import sqlite3
 import time
 from dataclasses import dataclass, field
-from datetime import datetime
-from typing import Any, Dict, List, Optional, Sequence, Tuple
+from datetime import datetime, timezone
+from typing import Any, Dict, List, Optional, Sequence
 
-from .models import Fill, OrderIntent, Side, TradePlan
+from .models import Fill, OrderIntent, Side
 from .broker import Broker
-from .exits import ChandelierExit, TrailingStopManager
 
 logger = logging.getLogger("greedbot.paper_engine")
 
@@ -246,7 +245,7 @@ class InstitutionalPaperBroker(Broker):
 
     def record_snapshot(self) -> Dict[str, Any]:
         """Saves portfolio equity telemetry snapshot to SQLite."""
-        now_iso = datetime.utcnow().isoformat()
+        now_iso = datetime.now(timezone.utc).isoformat()
         pos_val = sum(p.market_value for p in self._positions.values())
         unrealized = sum(p.unrealized_pnl for p in self._positions.values())
         total_val = self._cash + pos_val
@@ -277,7 +276,7 @@ class InstitutionalPaperBroker(Broker):
             cursor.execute(
                 "INSERT INTO paper_orders (timestamp, ticker, side, quantity, requested_price, filled_price, slippage, fees, total_value) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 (
-                    datetime.utcnow().isoformat(),
+                    datetime.now(timezone.utc).isoformat(),
                     ticker.upper(),
                     side,
                     qty,

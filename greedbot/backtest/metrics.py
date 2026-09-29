@@ -18,6 +18,8 @@ from tabulate import tabulate
 class PerformanceMetrics:
     """
     Standardized quantitative trading performance metrics.
+    Includes absolute returns, risk-adjusted ratios (Sharpe, Sortino, Calmar),
+    tail-risk statistics (VaR, CVaR), drawdown analytics, and optional benchmark comparisons.
     """
     initial_capital: float
     final_equity: float
@@ -37,8 +39,19 @@ class PerformanceMetrics:
     avg_win_usd: float
     avg_loss_usd: float
     payoff_ratio: float
+    var_95_pct: float = 0.0
+    var_99_pct: float = 0.0
+    cvar_95_pct: float = 0.0
+    cvar_99_pct: float = 0.0
     daily_returns: List[float] = field(default_factory=list)
     equity_curve: List[float] = field(default_factory=list)
+    drawdown_series: List[float] = field(default_factory=list)
+    # Benchmark relative analytics
+    benchmark_total_return_pct: Optional[float] = None
+    alpha: Optional[float] = None
+    beta: Optional[float] = None
+    information_ratio: Optional[float] = None
+    treynor_ratio: Optional[float] = None
 
     @classmethod
     def calculate(
@@ -47,6 +60,7 @@ class PerformanceMetrics:
         trades: Sequence[Dict[str, Any]],
         risk_free_rate: float = 0.04,
         bars_per_year: int = 252,
+        benchmark_prices: Optional[Sequence[float]] = None,
     ) -> PerformanceMetrics:
         if not equity_curve:
             raise ValueError("equity_curve cannot be empty")
@@ -86,7 +100,7 @@ class PerformanceMetrics:
         else:
             sortino = sharpe
 
-        # Max Drawdown
+        # Max Drawdown & Drawdown series
         peak = np.maximum.accumulate(eq)
         drawdowns = (peak - eq) / peak
         max_dd = float(np.max(drawdowns)) * 100.0 if len(drawdowns) > 0 else 0.0
@@ -104,18 +118,77 @@ class PerformanceMetrics:
         # Calmar Ratio (CAGR / Max Drawdown)
         calmar = (cagr / max_dd) if max_dd > 1e-4 else (cagr if cagr > 0 else 0.0)
 
+        # Historical Value at Risk (VaR) & Conditional VaR (CVaR / Expected Shortfall)
+        if len(returns) > 1:
+            # Losses are negative returns; VaR represents the threshold loss percentage
+            losses = -returns * 100.0
+            var_95 = float(np.percentile(losses, 95))
+            var_99 = float(np.percentile(losses, 99))
+            cvar_95_losses = losses[losses >= var_95]
+            cvar_95 = float(np.mean(cvar_95_losses)) if len(cvar_95_losses) > 0 else var_95
+            cvar_99_losses = losses[losses >= var_99]
+            cvar_99 = float(np.mean(cvar_99_losses)) if len(cvar_99_losses) > 0 else var_99
+        else:
+            var_95 = var_99 = cvar_95 = cvar_99 = 0.0
+
+        # Benchmark relative calculations
+        bench_ret_pct: Optional[float] = None
+        alpha_val: Optional[float] = None
+        beta_val: Optional[float] = None
+        info_ratio: Optional[float] = None
+        treynor_val: Optional[float] = None
+
+        if benchmark_prices is not None and len(benchmark_prices) > 1:
+            b_arr = np.array(benchmark_prices, dtype=float)
+            bench_ret_pct = round(((b_arr[-1] - b_arr[0]) / b_arr[0]) * 100.0, 2)
+            b_returns = np.diff(b_arr) / b_arr[:-1]
+
+            # Match lengths
+            min_len = min(len(returns), len(b_returns))
+            strat_r = returns[-min_len:]
+            bench_r = b_returns[-min_len:]
+
+            var_b = float(np.var(bench_r, ddof=1)) if min_len > 1 else 0.0
+            if var_b > 1e-9:
+                cov_sb = float(np.cov(strat_r, bench_r)[0, 1])
+                beta_calc = cov_sb / var_b
+            else:
+                beta_calc = 1.0
+
+            beta_val = round(beta_calc, 2)
+
+            # Annualized benchmark return
+            bench_cagr = (((b_arr[-1] / b_arr[0]) ** (1.0 / years)) - 1.0) * 100.0 if b_arr[-1] > 0 else -100.0
+            rf_pct = risk_free_rate * 100.0
+            # Jensen's Alpha: CAGR - [Rf + Beta * (Bench_CAGR - Rf)]
+            alpha_calc = cagr - (rf_pct + beta_calc * (bench_cagr - rf_pct))
+            alpha_val = round(alpha_calc, 2)
+
+            # Tracking error and Information Ratio
+            active_ret = strat_r - bench_r
+            tracking_error = float(np.std(active_ret, ddof=1)) * math.sqrt(bars_per_year) if min_len > 1 else 0.0
+            if tracking_error > 1e-9:
+                ir_calc = (float(np.mean(active_ret)) * bars_per_year) / tracking_error
+                info_ratio = round(ir_calc, 2)
+
+            if abs(beta_calc) > 1e-4:
+                treynor_val = round((cagr - rf_pct) / beta_calc, 2)
+
         # Trade analytics
         n_trades = len(trades)
         wins = [t["pnl"] for t in trades if t.get("pnl", 0.0) > 0]
-        losses = [abs(t["pnl"]) for t in trades if t.get("pnl", 0.0) < 0]
+        losses_trade = [abs(t["pnl"]) for t in trades if t.get("pnl", 0.0) < 0]
 
         n_wins = len(wins)
-        n_losses = len(losses)
+        n_losses = len(losses_trade)
         win_rate = (n_wins / float(n_trades) * 100.0) if n_trades > 0 else 0.0
 
         total_gross_win = sum(wins)
-        total_gross_loss = sum(losses)
-        profit_factor = (total_gross_win / total_gross_loss) if total_gross_loss > 0 else (999.0 if total_gross_win > 0 else 0.0)
+        total_gross_loss = sum(losses_trade)
+        if total_gross_loss > 0:
+            profit_factor = total_gross_win / total_gross_loss
+        else:
+            profit_factor = 999.0 if total_gross_win > 0 else 0.0
 
         avg_win = (total_gross_win / n_wins) if n_wins > 0 else 0.0
         avg_loss = (total_gross_loss / n_losses) if n_losses > 0 else 0.0
@@ -140,8 +213,18 @@ class PerformanceMetrics:
             avg_win_usd=round(avg_win, 2),
             avg_loss_usd=round(avg_loss, 2),
             payoff_ratio=round(payoff, 2),
+            var_95_pct=round(var_95, 2),
+            var_99_pct=round(var_99, 2),
+            cvar_95_pct=round(cvar_95, 2),
+            cvar_99_pct=round(cvar_99, 2),
             daily_returns=returns.tolist(),
             equity_curve=eq.tolist(),
+            drawdown_series=(drawdowns * 100.0).tolist(),
+            benchmark_total_return_pct=bench_ret_pct,
+            alpha=alpha_val,
+            beta=beta_val,
+            information_ratio=info_ratio,
+            treynor_ratio=treynor_val,
         )
 
     def generate_tear_sheet(self) -> str:
@@ -155,10 +238,22 @@ class PerformanceMetrics:
             ["Annualized Sortino Ratio", f"{self.annualized_sortino:.2f}"],
             ["Max Drawdown (MDD)", f"{self.max_drawdown_pct:.2f}% ({self.max_drawdown_duration_bars} bars)"],
             ["Calmar Ratio", f"{self.calmar_ratio:.2f}"],
+            ["Historical VaR (95% / 99%)", f"{self.var_95_pct:.2f}% / {self.var_99_pct:.2f}%"],
+            ["Conditional VaR / CVaR (95% / 99%)", f"{self.cvar_95_pct:.2f}% / {self.cvar_99_pct:.2f}%"],
             ["Total Executed Trades", f"{self.total_trades}"],
             ["Win Rate", f"{self.win_rate_pct:.1f}% ({self.winning_trades}W / {self.losing_trades}L)"],
             ["Profit Factor", f"{self.profit_factor:.2f}"],
             ["Average Win / Loss", f"${self.avg_win_usd:,.2f} / ${self.avg_loss_usd:,.2f}"],
             ["Payoff Ratio (b)", f"{self.payoff_ratio:.2f}"],
         ]
+
+        if self.benchmark_total_return_pct is not None:
+            table_data.extend([
+                ["Benchmark Total Return", f"{self.benchmark_total_return_pct:+.2f}%"],
+                ["Beta (Market Sensitivity)", f"{self.beta:.2f}" if self.beta is not None else "N/A"],
+                ["Jensen's Alpha", f"{self.alpha:+.2f}%" if self.alpha is not None else "N/A"],
+                ["Information Ratio (IR)", f"{self.information_ratio:.2f}" if self.information_ratio is not None else "N/A"],
+                ["Treynor Ratio", f"{self.treynor_ratio:.2f}" if self.treynor_ratio is not None else "N/A"],
+            ])
+
         return tabulate(table_data, headers=["Performance Metric", "Value"], tablefmt="fancy_grid")

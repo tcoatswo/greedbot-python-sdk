@@ -7,10 +7,9 @@ parallel 3D Volatility Surface generator powered by the Rust backend.
 
 import ctypes
 import os
-import sys
 import math
 from dataclasses import dataclass
-from typing import List, Optional, Tuple
+from typing import List, Optional
 
 class OptionGreeksStruct(ctypes.Structure):
     _fields_ = [

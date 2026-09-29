@@ -7,7 +7,6 @@ for Global Minimum Variance (GMV) or Maximum Sharpe Ratio (Tangency) portfolios.
 
 from __future__ import annotations
 
-import math
 from typing import Any, Dict, List, Optional, Sequence
 import numpy as np
 from ..client import GreedBotClient
@@ -54,8 +53,6 @@ class MarkowitzAllocationStrategy(Strategy):
         capital_usd: float = 100000.0,
         price_matrix: Optional[np.ndarray] = None,
     ) -> BotRunResult:
-        cli = client or self.client or GreedBotClient()
-
         if price_matrix is None:
             # Generate representative price matrix across asset basket
             np.random.seed(42)

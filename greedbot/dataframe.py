@@ -9,7 +9,7 @@ tuples, or pandas DataFrames.
 from __future__ import annotations
 
 import math
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple
 
 
 def map_from_df(payload: Dict[str, Any], value_col: str) -> Dict[str, float]:

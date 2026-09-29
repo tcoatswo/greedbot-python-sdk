@@ -13,6 +13,8 @@ from .trend import MovingAverageCrossover, TimeSeriesMomentum
 from .mean_reversion import BollingerMeanReversion
 from .pairs import StatisticalArbitrageSpread
 from .market_maker import AvellanedaStoikovMarketMaker
+from .rsi import RSIMeanReversion
+from .macd import MACDCrossover
 
 __all__ = [
     "Signal",
@@ -23,4 +25,7 @@ __all__ = [
     "BollingerMeanReversion",
     "StatisticalArbitrageSpread",
     "AvellanedaStoikovMarketMaker",
+    "RSIMeanReversion",
+    "MACDCrossover",
 ]
+

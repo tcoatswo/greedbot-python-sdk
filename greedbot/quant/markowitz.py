@@ -8,7 +8,7 @@ and maximum Sharpe ratio (tangency) asset weights using return covariance matric
 from __future__ import annotations
 
 import math
-from typing import Any, Dict, List, Optional, Sequence
+from typing import Any, Dict, Sequence
 import numpy as np
 
 

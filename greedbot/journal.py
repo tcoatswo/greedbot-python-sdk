@@ -8,9 +8,9 @@ using GreedBot's unmetered /api/v1/log endpoints.
 from __future__ import annotations
 
 import logging
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 from .client import GreedBotClient
-from .models import BotRunResult, OrderIntent, Side, TradePlan
+from .models import BotRunResult, Side, TradePlan
 
 logger = logging.getLogger("greedbot.journal")
 

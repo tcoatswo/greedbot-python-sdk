@@ -2,7 +2,6 @@
 Unit tests for RiskLimits and portfolio validation.
 """
 
-import math
 import unittest
 from greedbot.risk import RiskLimits
 

@@ -5,9 +5,8 @@ Constructs multi-leg option strategies (Iron Condor, Verticals, Straddles, Stran
 Butterflies, Calendars) with composite Greeks, expiration P&L, break-evens, and margin requirements.
 """
 
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Tuple
-import math
+from dataclasses import dataclass
+from typing import Dict, List, Optional
 
 from .rust_engine import calculate_greeks, OptionGreeks
 

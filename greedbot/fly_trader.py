@@ -12,19 +12,13 @@ steering, and Descending Motor Neurons (DNa01/DNa02/MDN) linked to Merton Jump-K
 from __future__ import annotations
 
 import logging
-import math
-import os
-import time
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Tuple
+from dataclasses import dataclass
+from typing import Optional
 
 import numpy as np
 
-from .quant.jump_kelly import MertonJumpKellySizer
-from .quant.gex import GEXEngine, OptionContractData
-from .quant.spreads import IronCondor, VerticalSpread
 from .paper_engine import InstitutionalPaperBroker
-from .models import OrderIntent, Side
+from .quant.jump_kelly import MertonJumpKellySizer
 
 logger = logging.getLogger("greedbot.fly_trader")
 

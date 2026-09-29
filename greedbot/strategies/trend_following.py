@@ -80,8 +80,6 @@ class TrendFollowingStrategy(Strategy):
         capital_usd: float = 10000.0,
         prices: Optional[Sequence[float]] = None,
     ) -> BotRunResult:
-        cli = client or self.client or GreedBotClient()
-
         if prices is None:
             # Fetch synthetic / sample trend prices if not provided
             prices = [100.0 + i * 0.5 + math.sin(i / 5.0) * 2.0 for i in range(80)]

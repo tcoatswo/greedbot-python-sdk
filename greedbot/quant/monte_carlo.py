@@ -6,8 +6,7 @@ and Merton Jump Diffusion to compute Portfolio Value at Risk (VaR) and Condition
 """
 
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Tuple
-import math
+from typing import Optional
 import numpy as np
 
 @dataclass

@@ -3,7 +3,7 @@ Unit tests for AsyncGreedBotClient.
 """
 
 import unittest
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 from greedbot.async_client import AsyncGreedBotClient
 
 

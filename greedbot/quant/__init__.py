@@ -13,6 +13,7 @@ Mathematical models for options pricing, dealer positioning, spreads, risk contr
 from .kelly import KellyPositionSizer
 from .jump_kelly import MertonJumpKellySizer, compute_jump_kelly
 from .markowitz import MeanVarianceOptimizer
+from .risk_parity import RiskParityOptimizer
 from .rust_engine import (
     OptionGreeks,
     calculate_greeks,
@@ -38,6 +39,7 @@ __all__ = [
     "MertonJumpKellySizer",
     "compute_jump_kelly",
     "MeanVarianceOptimizer",
+    "RiskParityOptimizer",
     # Rust Options Greeks & Volatility
     "OptionGreeks",
     "calculate_greeks",
@@ -60,3 +62,4 @@ __all__ = [
     "MonteCarloEngine",
     "MonteCarloResult",
 ]
+

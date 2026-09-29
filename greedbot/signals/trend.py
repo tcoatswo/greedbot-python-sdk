@@ -6,8 +6,7 @@ Implements Moving Average Crossover and Time-Series Momentum (Rate of Change & A
 
 from __future__ import annotations
 
-import math
-from typing import Any, Dict, Optional, Sequence
+from typing import Sequence
 import numpy as np
 
 from .base import Signal, SignalDirection, SignalGenerator

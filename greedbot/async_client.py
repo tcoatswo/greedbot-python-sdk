@@ -8,20 +8,10 @@ concurrent receipt polling, and event-driven trading bots.
 from __future__ import annotations
 
 import asyncio
-import json
 import logging
-import os
-from typing import Any, Dict, List, Optional, Sequence
-import requests
+from typing import Any, Dict, Optional, Sequence
 
-from .client import (
-    DEFAULT_BASE_URL,
-    GreedBotAPIError,
-    GreedBotClient,
-    GreedBotSpendCapError,
-    GreedBotStaleDataError,
-)
-from .models import SlotInfo
+from .client import GreedBotClient
 
 logger = logging.getLogger("greedbot.async_client")
 

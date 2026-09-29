@@ -7,7 +7,6 @@ Event-driven options and equities strategies driven by the 90-day Earnings Radar
 
 from __future__ import annotations
 
-import math
 from typing import Any, Dict, List, Optional
 from ..client import GreedBotClient
 from ..models import BotRunResult, OrderIntent, Side

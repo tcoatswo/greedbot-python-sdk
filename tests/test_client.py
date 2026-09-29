@@ -7,7 +7,6 @@ from unittest.mock import MagicMock, patch
 import requests
 from greedbot.client import (
     GreedBotClient,
-    GreedBotAPIError,
     GreedBotSpendCapError,
     DEFAULT_BASE_URL,
 )

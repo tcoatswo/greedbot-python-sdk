@@ -5,13 +5,9 @@ Provides terminal-based live analytics (Rich ASCII charts) and Streamlit web UI 
 for 3D Volatility Surfaces, Market-Maker GEX, Multi-Leg Spread payoffs, and Monte Carlo risk.
 """
 
-from typing import Dict, List, Optional
-import sys
-
 from .quant.gex import GEXEngine, OptionContractData
-from .quant.spreads import IronCondor, VerticalSpread, Straddle, Strangle
+from .quant.spreads import IronCondor
 from .quant.monte_carlo import MonteCarloEngine
-from .quant.rust_engine import generate_volatility_surface
 
 def print_terminal_dashboard(spot: float = 580.0):
     """

@@ -8,7 +8,7 @@ Allocates across a diversified, low-cost ETF basket using an 80/20 barbell:
 from __future__ import annotations
 
 import math
-from typing import Any, Dict, List, Optional, Sequence
+from typing import Dict, List, Optional, Sequence
 from ..client import GreedBotClient
 from ..dataframe import map_from_df
 from ..models import BotRunResult, OrderIntent, Side

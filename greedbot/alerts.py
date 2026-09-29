@@ -7,10 +7,9 @@ and risk limit breach alerts to Discord, Slack, Telegram, and generic HTTP endpo
 
 from __future__ import annotations
 
-import json
 import logging
 import os
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 import requests
 
 from .models import OrderIntent, SlotInfo

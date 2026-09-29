@@ -5,9 +5,8 @@ Analyzes option chain open interest to determine aggregate dealer gamma exposure
 volatility flip points (Zero Gamma), Call/Put walls, and expiration Max Pain.
 """
 
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Tuple
-import math
+from dataclasses import dataclass
+from typing import Dict, List, Optional
 
 from .rust_engine import calculate_greeks
 

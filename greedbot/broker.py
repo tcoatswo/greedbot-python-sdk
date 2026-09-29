@@ -192,3 +192,112 @@ class PaperBroker(Broker):
         self._cash = staged_cash
         self._positions = staged_positions
         return fills
+
+    def get_position(self, ticker: str) -> float:
+        """Return the current signed share quantity for ticker (0.0 if flat)."""
+        return self._positions.get(ticker.strip().lower(), 0.0)
+
+    def is_flat(self, ticker: Optional[str] = None) -> bool:
+        """Check if a specific ticker or the entire portfolio is flat."""
+        if ticker is not None:
+            return abs(self.get_position(ticker)) < QUANTITY_EPSILON
+        return len(self._positions) == 0
+
+    def portfolio_value(self, prices: Dict[str, float]) -> float:
+        """
+        Mark-to-market total portfolio equity (cash + net value of open positions).
+        """
+        norm_prices = {k.strip().lower(): float(v) for k, v in prices.items()}
+        total_equity = self._cash
+        for ticker, shares in self._positions.items():
+            if ticker not in norm_prices:
+                raise ValueError(f"Price missing for open position ticker '{ticker}'")
+            total_equity += shares * norm_prices[ticker]
+        return float(total_equity)
+
+    def unrealized_pnl(
+        self,
+        prices: Dict[str, float],
+        cost_bases: Optional[Dict[str, float]] = None,
+    ) -> Dict[str, float]:
+        """
+        Calculates unrealized dollar P&L per position given current prices and optional cost basis.
+        """
+        norm_prices = {k.strip().lower(): float(v) for k, v in prices.items()}
+        pnl: Dict[str, float] = {}
+        for ticker, shares in self._positions.items():
+            if ticker not in norm_prices:
+                continue
+            curr_price = norm_prices[ticker]
+            cost = cost_bases.get(ticker, curr_price) if cost_bases else curr_price
+            if shares > 0:
+                pnl[ticker] = (curr_price - cost) * shares
+            elif shares < 0:
+                pnl[ticker] = (cost - curr_price) * abs(shares)
+            else:
+                pnl[ticker] = 0.0
+        return pnl
+
+    def check_stop_triggers(
+        self,
+        prices: Dict[str, float],
+        stops: Dict[str, float],
+    ) -> List[OrderIntent]:
+        """
+        Inspect open positions against stop prices and generate exit OrderIntents for any breaches.
+        - Long position triggers exit if current_price <= stop_price.
+        - Short position triggers exit if current_price >= stop_price.
+        """
+        norm_prices = {k.strip().lower(): float(v) for k, v in prices.items()}
+        norm_stops = {k.strip().lower(): float(v) for k, v in stops.items()}
+        exit_intents: List[OrderIntent] = []
+
+        for ticker, shares in self._positions.items():
+            if ticker not in norm_prices or ticker not in norm_stops:
+                continue
+            curr_price = norm_prices[ticker]
+            stop_price = norm_stops[ticker]
+
+            if shares > 0 and curr_price <= stop_price:
+                # Long stop breached -> Sell to close
+                dollars = shares * curr_price
+                exit_intents.append(
+                    OrderIntent(
+                        ticker=ticker,
+                        side=Side.SELL,
+                        dollars=dollars,
+                        stop=stop_price,
+                    )
+                )
+            elif shares < 0 and curr_price >= stop_price:
+                # Short stop breached -> Cover to close
+                dollars = abs(shares) * curr_price
+                exit_intents.append(
+                    OrderIntent(
+                        ticker=ticker,
+                        side=Side.BUY_TO_COVER,
+                        dollars=dollars,
+                        stop=stop_price,
+                    )
+                )
+
+        return exit_intents
+
+    def close_all_intents(self, prices: Dict[str, float]) -> List[OrderIntent]:
+        """
+        Generate closing OrderIntents to flatten all open positions at current market prices.
+        """
+        norm_prices = {k.strip().lower(): float(v) for k, v in prices.items()}
+        intents: List[OrderIntent] = []
+
+        for ticker, shares in self._positions.items():
+            if ticker not in norm_prices:
+                raise ValueError(f"Price missing for open position ticker '{ticker}'")
+            price = norm_prices[ticker]
+            if shares > 0:
+                intents.append(OrderIntent(ticker=ticker, side=Side.SELL, dollars=shares * price))
+            elif shares < 0:
+                intents.append(OrderIntent(ticker=ticker, side=Side.BUY_TO_COVER, dollars=abs(shares) * price))
+
+        return intents
+

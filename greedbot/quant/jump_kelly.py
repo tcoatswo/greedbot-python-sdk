@@ -9,7 +9,7 @@ with continuous running-maximum drawdown penalties.
 from __future__ import annotations
 
 import numpy as np
-from typing import Any, Dict, Optional, Tuple, Union
+from typing import Any, Dict
 
 
 def bisection_solve(f_func, a: float = 0.0, b: float = 1.0, tol: float = 1e-5, max_iter: int = 50) -> float:

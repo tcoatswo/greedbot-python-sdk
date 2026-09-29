@@ -7,7 +7,6 @@ under discrete payoff and continuous lognormal dynamics.
 
 from __future__ import annotations
 
-import math
 from typing import Any, Dict, Optional
 
 
