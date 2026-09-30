@@ -10,6 +10,17 @@ from greedbot.models import OrderIntent, Side, SlotInfo
 
 class TestAlerts(unittest.TestCase):
 
+    @patch("greedbot.alerts.logger")
+    @patch("requests.post")
+    def test_webhook_failure_does_not_log_secret_url(self, mock_post, mock_logger):
+        secret_url = "https://api.telegram.org/botsecret-token/sendMessage"
+        mock_post.side_effect = RuntimeError(f"request failed: {secret_url}")
+        dispatcher = WebhookDispatcher()
+        self.assertFalse(dispatcher._post_json(secret_url, {"text": "test"}))
+        logged = str(mock_logger.error.call_args)
+        self.assertNotIn("secret-token", logged)
+
+
     @patch("requests.post")
     def test_discord_trade_alert(self, mock_post):
         mock_resp = MagicMock()

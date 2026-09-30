@@ -43,7 +43,9 @@ class WebhookDispatcher:
             resp = requests.post(url, json=payload, timeout=self.timeout)
             return resp.status_code in (200, 204)
         except Exception as e:
-            logger.error(f"Failed to dispatch webhook to {url}: {e}")
+            # Webhook URLs and Telegram paths contain credentials. Exception text can
+            # include the request URL too, so keep both out of logs.
+            logger.error("Webhook dispatch failed (%s)", type(e).__name__)
             return False
 
     def send_trade_alert(

@@ -38,6 +38,27 @@ class TestGreedBotClient(unittest.TestCase):
             with self.assertRaises(ValueError):
                 GreedBotClient.from_env()
 
+    def test_rejects_insecure_base_url(self):
+        with self.assertRaises(ValueError):
+            GreedBotClient(api_key="secret", base_url="http://greedbot.com")
+
+    @patch.object(requests.Session, "request")
+    def test_rejects_external_url_without_sending_key(self, mock_request):
+        client = GreedBotClient(api_key="secret")
+        with self.assertRaises(ValueError):
+            client._request_with_retry("GET", "https://attacker.example/collect")
+        mock_request.assert_not_called()
+
+    @patch.object(requests.Session, "request")
+    def test_does_not_follow_redirects(self, mock_request):
+        mock_response = MagicMock(status_code=302)
+        mock_response.headers = {"Location": "https://attacker.example/collect"}
+        mock_request.return_value = mock_response
+        client = GreedBotClient(api_key="secret")
+        response = client._request_with_retry("GET", "/api/v1/ping")
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(mock_request.call_args.kwargs["allow_redirects"])
+
     @patch.object(requests.Session, "request")
     def test_ping_endpoint(self, mock_request):
         mock_resp = MagicMock()

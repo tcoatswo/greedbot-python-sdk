@@ -13,6 +13,7 @@ import os
 import random
 import time
 from typing import Any, Dict, Optional, Sequence, Union
+from urllib.parse import urlsplit
 
 import requests
 
@@ -62,6 +63,10 @@ class GreedBotClient:
         self.base_url = (base_url or env_base).rstrip("/")
         self.timeout = float(timeout)
 
+        base = urlsplit(self.base_url)
+        if base.scheme != "https" or not base.hostname or base.username or base.password or base.fragment:
+            raise ValueError("GreedBot API base_url must be an HTTPS URL without credentials or a fragment")
+
         self.session = requests.Session()
         if self.api_key:
             self.session.headers.update({
@@ -101,7 +106,16 @@ class GreedBotClient:
             p = path_or_url if path_or_url.startswith("/") else f"/{path_or_url}"
             url = f"{self.base_url}{p}"
 
+        base = urlsplit(self.base_url)
+        target = urlsplit(url)
+        if (target.scheme, target.hostname, target.port) != (base.scheme, base.hostname, base.port) or target.username or target.password or target.fragment:
+            raise ValueError("Request URL must use the configured GreedBot API origin")
+
+        if "allow_redirects" in kwargs:
+            raise ValueError("Redirect handling is fixed to protect API credentials")
+
         kwargs.setdefault("timeout", self.timeout)
+        kwargs["allow_redirects"] = False
         backoff = 1.0
 
         for attempt in range(max_retries):
