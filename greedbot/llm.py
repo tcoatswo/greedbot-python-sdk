@@ -190,9 +190,9 @@ class LLMAnalyzer:
             return self._fallback_result(sym)
 
     def _fallback_result(self, ticker: str) -> Dict[str, Any]:
-        """Fallback deterministic analysis when no external LLM key is configured."""
+        """Neutral result when no external LLM key is configured."""
         return {
-            "qualitative_sentiment": 0.75,
-            "catalyst_conviction": 0.80,
-            "summary_rationale": f"Positive catalyst expansion and operational growth momentum reported for {ticker}."
+            "qualitative_sentiment": 0.0,
+            "catalyst_conviction": 0.0,
+            "summary_rationale": f"No catalyst analysis available for {ticker}."
         }

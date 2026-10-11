@@ -7,9 +7,9 @@ Executes dollar-neutral spread trades between cointegrated asset pairs
 
 from __future__ import annotations
 
-import math
 from typing import Any, Dict, List, Optional, Sequence
 from ..client import GreedBotClient
+from ..datasources.market import MarketDataSource
 from ..models import BotRunResult, OrderIntent, Side
 from ..signals.pairs import StatisticalArbitrageSpread
 from .base import Strategy
@@ -62,12 +62,14 @@ class StatArbPairsStrategy(Strategy):
         capital_usd: float = 10000.0,
         prices_a: Optional[Sequence[float]] = None,
         prices_b: Optional[Sequence[float]] = None,
+        market_data: Optional[MarketDataSource] = None,
     ) -> BotRunResult:
         if prices_a is None or prices_b is None:
-            # Synthetic cointegrated series with a transient divergence
-            prices_b = [100.0 + i * 0.2 + math.sin(i / 4.0) * 1.5 for i in range(70)]
-            # Divergence on A
-            prices_a = [p * 1.5 + (3.5 if i > 60 else 0.0) for i, p in enumerate(prices_b)]
+            if market_data is None or prices_a is not None or prices_b is not None:
+                raise ValueError("Provide both price series or a market_data source")
+            aligned = market_data.get_aligned_closes([self.ticker_a, self.ticker_b])
+            prices_a = aligned[self.ticker_a.lower()]
+            prices_b = aligned[self.ticker_b.lower()]
 
         res = self.evaluate_pair(prices_a, prices_b)
         sig_a: Any = res["signal_a"]

@@ -28,6 +28,30 @@ Under the hood, `greedbot` provides a native SIMD-accelerated Rust backend (`cra
 
 ## 📦 Installation
 
+### Trading data and order safety
+
+`YahooFinanceSource.get_historical_bars(ticker, as_of=...)` returns completed,
+timestamped OHLCV bars for strategy evaluation. `get_historical_prices` returns
+their closing prices. Provider failures and missing quotes raise
+`MarketDataUnavailableError`; the SDK does not replace them with synthetic prices.
+`get_next_bar_open` cannot know a future opening price. In a backtest, pass the
+observed next bar's open to the paper broker after that bar starts.
+Trend following, mean reversion, pairs trading, and Markowitz allocation accept
+`market_data=YahooFinanceSource()` when no price arrays are supplied. Pairs and
+portfolio strategies align closes by timestamp. They raise if no usable data is
+available. Market making requires an explicit mid price and volatility.
+
+Alpaca and Tradier adapters require credentials, including for their broker
+paper and sandbox endpoints. Use `PaperBroker` for local simulation. Their
+`execute` methods return only confirmed fills; an accepted or pending order may
+return no fill. Inspect `adapter.submitted_orders` for submitted IDs, then call
+`adapter.get_order(id)` to reconcile status and `adapter.cancel_order(id)` to
+request cancellation. A successful cancellation request must also be checked
+with `get_order`. Pass `current_prices` when placing market orders so dollar
+intents can be sized; limit orders can use their limit as a reference price.
+If submission times out, reconcile broker orders before trying again because
+the original request may have succeeded.
+
 ### Direct Install via Git
 ```bash
 pip install git+https://github.com/tcoatswo/greedbot-python-sdk.git

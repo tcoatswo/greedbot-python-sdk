@@ -10,6 +10,7 @@ from __future__ import annotations
 from typing import Any, Dict, List, Optional, Sequence
 import numpy as np
 from ..client import GreedBotClient
+from ..datasources.market import MarketDataSource
 from ..models import BotRunResult, OrderIntent, Side
 from ..quant.markowitz import MeanVarianceOptimizer
 from .base import Strategy
@@ -52,14 +53,13 @@ class MarkowitzAllocationStrategy(Strategy):
         client: Optional[GreedBotClient] = None,
         capital_usd: float = 100000.0,
         price_matrix: Optional[np.ndarray] = None,
+        market_data: Optional[MarketDataSource] = None,
     ) -> BotRunResult:
         if price_matrix is None:
-            # Generate representative price matrix across asset basket
-            np.random.seed(42)
-            n_assets = len(self.assets)
-            n_periods = 100
-            returns = np.random.normal(0.0004, 0.01, size=(n_periods, n_assets))
-            price_matrix = np.cumprod(1.0 + returns, axis=0) * 100.0
+            if market_data is None:
+                raise ValueError("Provide a price_matrix or a market_data source")
+            aligned = market_data.get_aligned_closes(self.assets, period="1y")
+            price_matrix = np.array([aligned[asset.lower()] for asset in self.assets]).T
 
         opt_res = self.compute_weights(price_matrix)
         weights: Dict[str, float] = opt_res["weights"]

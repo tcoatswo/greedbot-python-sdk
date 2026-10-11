@@ -8,6 +8,7 @@ Unit tests for the 5 newly implemented modules in GreedBot SDK:
 """
 
 import unittest
+from unittest.mock import patch
 from greedbot.quant.gex import GEXEngine, OptionContractData, GEXResult
 from greedbot.quant.spreads import (
     IronCondor,
@@ -106,36 +107,15 @@ class TestNewQuantAndExecutionFeatures(unittest.TestCase):
     # -------------------------------------------------------------
     # 3. Turnkey Broker Connectors Tests
     # -------------------------------------------------------------
-    def test_alpaca_broker_adapter_mock_mode(self):
-        adapter = AlpacaBrokerAdapter(api_key=None, secret_key=None, paper=True)
-        acc = adapter.get_account()
-        self.assertEqual(acc["status"], "MOCK_MODE")
-        self.assertEqual(acc["cash"], 100000.0)
-        self.assertEqual(adapter.cash, 100000.0)
+    def test_alpaca_requires_credentials(self):
+        with patch.dict("os.environ", {}, clear=True):
+            with self.assertRaises(ValueError):
+                AlpacaBrokerAdapter(api_key=None, secret_key=None, paper=True)
 
-        intents = [
-            OrderIntent(ticker="SPY", dollars=5800.0, side=Side.BUY, limit=580.0),
-            OrderIntent(ticker="QQQ", dollars=2450.0, side=Side.SELL, limit=490.0),
-        ]
-        fills = adapter.execute(intents)
-        self.assertEqual(len(fills), 2)
-        self.assertEqual(fills[0].ticker.upper(), "SPY")
-        self.assertEqual(fills[0].quantity, 10.0)
-        self.assertEqual(fills[1].ticker.upper(), "QQQ")
-
-    def test_tradier_broker_adapter_mock_mode(self):
-        adapter = TradierBrokerAdapter(access_token=None, account_id=None, sandbox=True)
-        balances = adapter.get_balances()
-        self.assertEqual(balances["status"], "MOCK_MODE")
-        self.assertEqual(adapter.cash, 50000.0)
-
-        opt_order = adapter.submit_option_order(
-            symbol="SPY",
-            option_symbol="SPY260918C00585000",
-            side="buy_to_open",
-            quantity=2,
-        )
-        self.assertEqual(opt_order["status"], "ok")
+    def test_tradier_requires_credentials(self):
+        with patch.dict("os.environ", {}, clear=True):
+            with self.assertRaises(ValueError):
+                TradierBrokerAdapter(access_token=None, account_id=None, sandbox=True)
 
     # -------------------------------------------------------------
     # 4. Monte Carlo Risk & Stress-Testing Tests

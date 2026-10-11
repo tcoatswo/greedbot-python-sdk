@@ -9,6 +9,7 @@ polling (HTTP 202), and slot freshness verification to prevent mid-bake stale da
 from __future__ import annotations
 
 import logging
+import math
 import os
 import random
 import time
@@ -131,8 +132,16 @@ class GreedBotClient:
 
                 # HTTP 429: Rate limited -> sleep Retry-After
                 if resp.status_code == 429:
+                    if attempt == max_retries - 1:
+                        break
                     retry_after = resp.headers.get("Retry-After")
-                    sleep_time = float(retry_after) if retry_after else backoff
+                    try:
+                        sleep_time = float(retry_after) if retry_after else backoff
+                    except ValueError:
+                        sleep_time = backoff
+                    if not math.isfinite(sleep_time) or sleep_time < 0:
+                        sleep_time = backoff
+                    sleep_time = min(sleep_time, 60.0)
                     sleep_time += random.uniform(0.1, 0.5)  # add jitter
                     time.sleep(sleep_time)
                     backoff *= 1.5
@@ -141,8 +150,10 @@ class GreedBotClient:
                 return resp
 
             except (requests.ConnectionError, requests.Timeout) as e:
-                if attempt == max_retries - 1:
-                    raise GreedBotAPIError(f"Network request failed for {method} {url}: {e}") from e
+                # A POST may have reached the server even when its response was lost.
+                # Replaying it can create duplicate receipts or other side effects.
+                if method.upper() not in ("GET", "HEAD") or attempt == max_retries - 1:
+                    raise GreedBotAPIError(f"Network request failed for {method} {url}; outcome may be unknown") from e
                 jitter = random.uniform(0.1, 0.5)
                 time.sleep(backoff + jitter)
                 backoff *= 1.5
@@ -190,7 +201,13 @@ class GreedBotClient:
                 return poll_resp.json()
             elif poll_resp.status_code == 202:
                 retry_header = poll_resp.headers.get("Retry-After")
-                sleep_secs = float(retry_header) if retry_header else poll_delay
+                try:
+                    sleep_secs = float(retry_header) if retry_header else poll_delay
+                except ValueError:
+                    sleep_secs = poll_delay
+                if not math.isfinite(sleep_secs) or sleep_secs < 0:
+                    sleep_secs = poll_delay
+                sleep_secs = min(sleep_secs, 60.0)
                 time.sleep(sleep_secs)
                 poll_delay = min(poll_delay * 1.3, 4.0)
             else:

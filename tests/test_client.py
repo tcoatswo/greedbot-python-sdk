@@ -99,6 +99,15 @@ class TestGreedBotClient(unittest.TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(mock_request.call_count, 2)
 
+    @patch.object(requests.Session, "request")
+    def test_post_network_failure_is_not_replayed(self, mock_request):
+        mock_request.side_effect = requests.Timeout("secret request details")
+        client = GreedBotClient(api_key="test")
+        with self.assertRaisesRegex(Exception, "outcome may be unknown") as context:
+            client._request_with_retry("POST", "/api/v1/targets/receipt", json={})
+        self.assertNotIn("secret request details", str(context.exception))
+        self.assertEqual(mock_request.call_count, 1)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -8,9 +8,10 @@ asymmetric volatility mispricings.
 
 from __future__ import annotations
 
+import math
 from typing import Any, Dict, Optional, Union
 from ..client import GreedBotClient
-from ..models import BotRunResult, OrderIntent, Side
+from ..models import BotRunResult
 from .base import Strategy
 
 
@@ -43,8 +44,8 @@ class QualitativeOverlayEngine(Strategy):
         self,
         client_or_ticker: Optional[Union[GreedBotClient, str]] = None,
         ticker: Optional[str] = None,
-        qualitative_sentiment: float = 0.85,
-        conviction: float = 0.85,
+        qualitative_sentiment: Optional[float] = None,
+        conviction: Optional[float] = None,
         client: Optional[GreedBotClient] = None,
     ) -> Dict[str, Any]:
         """
@@ -60,12 +61,19 @@ class QualitativeOverlayEngine(Strategy):
 
         cli = cli or self.client or GreedBotClient()
         sym = (sym or self.default_ticker).strip().lower()
+        if (qualitative_sentiment is None or conviction is None
+                or not math.isfinite(qualitative_sentiment)
+                or not math.isfinite(conviction)
+                or not -1.0 <= qualitative_sentiment <= 1.0
+                or not 0.0 <= conviction <= 1.0):
+            raise ValueError("Provide validated sentiment [-1, 1] and conviction [0, 1]")
 
-        try:
-            exp = cli.get_hub_earnings_expected_move(ticker=sym)
-            mkt_move = float(exp.get("expected_move_pct", 5.0) or 5.0) if isinstance(exp, dict) else 5.0
-        except Exception:
-            mkt_move = 5.0
+        exp = cli.get_hub_earnings_expected_move(ticker=sym)
+        if not isinstance(exp, dict) or "expected_move_pct" not in exp:
+            raise ValueError("Expected move data is unavailable")
+        mkt_move = float(exp["expected_move_pct"])
+        if not math.isfinite(mkt_move) or mkt_move <= 0:
+            raise ValueError("Expected move must be finite and positive")
 
         # Compute qualitative expected move
         qual_move = round(mkt_move * (1.0 + (qualitative_sentiment * conviction * 0.9)), 2)
@@ -92,19 +100,18 @@ class QualitativeOverlayEngine(Strategy):
             "recommended_trade": recommendation,
         }
 
-    def run(self, client: Optional[GreedBotClient] = None, capital_usd: float = 10000.0) -> BotRunResult:
+    def run(self, client: Optional[GreedBotClient] = None, capital_usd: float = 10000.0,
+            qualitative_sentiment: Optional[float] = None,
+            conviction: Optional[float] = None) -> BotRunResult:
         cli = client or self.client or GreedBotClient()
-        div = self.evaluate_divergence(client=cli, ticker=self.default_ticker)
-        intents = [
-            OrderIntent(
-                ticker=self.default_ticker,
-                side=Side.BUY,
-                dollars=capital_usd * 0.10,
-            )
-        ]
+        div = self.evaluate_divergence(client=cli, ticker=self.default_ticker,
+                                       qualitative_sentiment=qualitative_sentiment,
+                                       conviction=conviction)
+        # The assessment concerns option spreads. An equity OrderIntent cannot
+        # express those legs, so do not manufacture an underlying-stock order.
         return BotRunResult(
             trades=[div],
             summary=div,
-            target_dollars={self.default_ticker: capital_usd * 0.10},
-            intents=intents,
+            target_dollars={},
+            intents=[],
         )

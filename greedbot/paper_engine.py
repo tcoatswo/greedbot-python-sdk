@@ -77,6 +77,8 @@ class InstitutionalPaperBroker(Broker):
         option_fee_per_contract: float = 0.65,
         equity_fee_per_share: float = 0.005,
     ):
+        if not math.isfinite(starting_cash) or starting_cash <= 0:
+            raise ValueError("starting_cash must be finite and > 0")
         self.initial_capital = float(starting_cash)
         self._cash = float(starting_cash)
         self.db_path = db_path
@@ -135,6 +137,8 @@ class InstitutionalPaperBroker(Broker):
         return self._cash + pos_val
 
     def update_market_price(self, ticker: str, current_price: float) -> None:
+        if not math.isfinite(current_price) or current_price <= 0:
+            raise ValueError("current_price must be finite and > 0")
         t = ticker.lower()
         if t in self._positions:
             self._positions[t].current_price = float(current_price)
@@ -151,7 +155,22 @@ class InstitutionalPaperBroker(Broker):
         """
         Executes a single order applying square-root market impact and spread crossing.
         """
+        if side not in (Side.BUY, Side.SELL):
+            raise ValueError("InstitutionalPaperBroker supports only Buy and Sell")
+        for name, value in (("quantity", quantity), ("mid_price", mid_price), ("daily_volume", daily_volume)):
+            if not math.isfinite(value) or value <= 0:
+                raise ValueError(f"{name} must be finite and > 0")
+        if is_option and quantity != int(quantity):
+            raise ValueError("Option quantity must be a whole number of contracts")
+        for name, value in (("slippage_coeff", self.slippage_coeff),
+                            ("half_spread_bps", self.half_spread_bps),
+                            ("option_fee_per_contract", self.option_fee_per_contract),
+                            ("equity_fee_per_share", self.equity_fee_per_share)):
+            if not math.isfinite(value) or value < 0:
+                raise ValueError(f"{name} must be finite and >= 0")
         t = ticker.lower()
+        if t in self._positions and self._positions[t].is_option != is_option:
+            raise ValueError("Cannot mix option and equity positions under one ticker")
         multiplier = 100.0 if is_option else 1.0
 
         # Half-spread cost
@@ -226,14 +245,17 @@ class InstitutionalPaperBroker(Broker):
         max_slippage_pct: Optional[float] = None,
     ) -> List[Fill]:
         fills = []
+        prices = {key.lower(): value for key, value in (current_prices or {}).items()}
         for intent in intents:
             t = intent.ticker.lower()
-            price = (
-                current_prices.get(t, intent.limit or 100.0)
-                if current_prices
-                else (intent.limit or 100.0)
-            )
-            qty = round(intent.dollars / price, 4) if price > 0 else 1.0
+            if t not in prices:
+                raise ValueError(f"A current market price is required for {t}")
+            price = prices[t]
+            if not math.isfinite(price) or price <= 0:
+                raise ValueError(f"Invalid market price for {t}")
+            qty = round(intent.dollars / price, 4)
+            if qty <= 0:
+                raise ValueError(f"Order quantity for {t} rounds to zero")
             fill = self.execute_order(
                 ticker=t,
                 side=intent.side,

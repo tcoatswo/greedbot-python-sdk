@@ -7,7 +7,7 @@ import tempfile
 import unittest
 from greedbot.paper_engine import InstitutionalPaperBroker
 from greedbot.fly_trader import DrosophilaConnectomeTrader, ConnectomeSensoryInput, FlyMotorDecision
-from greedbot.models import Side
+from greedbot.models import OrderIntent, Side
 
 
 class TestPaperAndFlyTrader(unittest.TestCase):
@@ -56,6 +56,17 @@ class TestPaperAndFlyTrader(unittest.TestCase):
         self.assertGreater(fill.price, 100.0)
         self.assertGreater(self.broker.realized_pnl, 0.0)
         self.assertEqual(len(self.broker.positions), 0)
+
+    def test_invalid_order_cannot_change_cash_or_positions(self):
+        for quantity in (-10.0, float("nan"), float("inf")):
+            with self.assertRaises(ValueError):
+                self.broker.execute_order("SPY", Side.BUY, quantity, 100.0)
+        with self.assertRaises(ValueError):
+            self.broker.execute_order("SPY", Side.BUY, 1.0, float("nan"))
+        with self.assertRaises(ValueError):
+            self.broker.execute([OrderIntent("SPY", Side.BUY, 100.0)])
+        self.assertEqual(self.broker.cash, 100000.0)
+        self.assertEqual(self.broker.positions, {})
 
     def test_sqlite_snapshot_logging(self):
         snapshot = self.broker.record_snapshot()

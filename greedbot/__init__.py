@@ -46,6 +46,8 @@ from .alerts import WebhookDispatcher
 from .datasources import (
     DataSource,
     MarketDataSource,
+    HistoricalBar,
+    MarketDataUnavailableError,
     YahooFinanceSource,
     CatalystDataSource,
     SecEdgarSource,
@@ -157,6 +159,8 @@ __all__ = [
     # Data Sources
     "DataSource",
     "MarketDataSource",
+    "HistoricalBar",
+    "MarketDataUnavailableError",
     "YahooFinanceSource",
     "CatalystDataSource",
     "SecEdgarSource",

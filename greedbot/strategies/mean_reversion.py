@@ -7,9 +7,9 @@ and trades for a return toward historical rolling equilibrium.
 
 from __future__ import annotations
 
-import math
 from typing import Any, Dict, List, Optional, Sequence
 from ..client import GreedBotClient
+from ..datasources.market import MarketDataSource
 from ..models import BotRunResult, OrderIntent, Side
 from ..quant.kelly import KellyPositionSizer
 from ..signals.mean_reversion import BollingerMeanReversion
@@ -68,10 +68,12 @@ class MeanReversionStrategy(Strategy):
         client: Optional[GreedBotClient] = None,
         capital_usd: float = 10000.0,
         prices: Optional[Sequence[float]] = None,
+        market_data: Optional[MarketDataSource] = None,
     ) -> BotRunResult:
         if prices is None:
-            # Sample prices exhibiting mean-reverting sinusoidal oscillation
-            prices = [100.0 + math.sin(i / 3.0) * 8.0 for i in range(40)]
+            if market_data is None:
+                raise ValueError("Provide historical prices or a market_data source")
+            prices = market_data.get_historical_prices(self.ticker)
 
         eval_res = self.evaluate_signal(prices)
         target_dollars: Dict[str, float] = {}

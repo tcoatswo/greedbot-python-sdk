@@ -4,6 +4,9 @@ Trend Following, Mean Reversion, Stat Arb Pairs, Market Making, and Markowitz.
 """
 
 import unittest
+import math
+import numpy as np
+from unittest.mock import MagicMock
 from greedbot.models import Side
 from greedbot.strategies import (
     MarketMakerStrategy,
@@ -47,6 +50,8 @@ class TestNewStrategies(unittest.TestCase):
 
     def test_market_maker_strategy(self):
         strat = MarketMakerStrategy(ticker="NVDA", quote_size_usd=1000.0)
+        with self.assertRaises(ValueError):
+            strat.run()
         res = strat.run(capital_usd=10000.0, mid_price=100.0, inventory_q=0.0, volatility_sigma=0.02)
         self.assertEqual(len(res.intents), 2)
         sides = [i.side for i in res.intents]
@@ -57,10 +62,30 @@ class TestNewStrategies(unittest.TestCase):
 
     def test_markowitz_allocation_strategy(self):
         strat = MarkowitzAllocationStrategy(assets=["SPY", "TLT", "GLD"], mode="tangency")
-        res = strat.run(capital_usd=50000.0)
+        matrix = np.array([[100 + i * 0.2 + math.sin(i / 4),
+                            90 + i * 0.1 + math.cos(i / 7),
+                            80 + i * 0.15 + math.sin(i / 11)] for i in range(100)])
+        res = strat.run(capital_usd=50000.0, price_matrix=matrix)
         self.assertEqual(len(res.target_dollars), 3)
         total_alloc = sum(res.target_dollars.values())
         self.assertAlmostEqual(total_alloc, 50000.0, delta=10.0)
+
+    def test_strategies_require_real_or_explicit_market_data(self):
+        with self.assertRaises(ValueError):
+            MeanReversionStrategy().run()
+        with self.assertRaises(ValueError):
+            TrendFollowingStrategy().run()
+        with self.assertRaises(ValueError):
+            StatArbPairsStrategy().run()
+        with self.assertRaises(ValueError):
+            MarkowitzAllocationStrategy().run()
+
+    def test_strategy_can_use_market_data_source(self):
+        source = MagicMock()
+        source.get_historical_prices.return_value = [100.0] * 10 + [75.0]
+        result = MeanReversionStrategy(window=10).run(market_data=source)
+        self.assertEqual(result.intents[0].side, Side.BUY)
+        source.get_historical_prices.assert_called_once_with("SPY")
 
 
 if __name__ == "__main__":
