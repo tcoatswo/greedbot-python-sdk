@@ -142,6 +142,11 @@ class TestStrategies(unittest.TestCase):
         self.assertEqual(res["assessment"], "ASYMMETRIC_UNDERPRICED_VOLATILITY")
         self.assertTrue(res["asymmetry_delta_pct"] > 2.0)
 
+        run = strat.run(client=self.mock_client, qualitative_sentiment=0.90, conviction=0.90)
+        self.assertEqual(run.intents, [])
+        with self.assertRaises(ValueError):
+            strat.run(client=self.mock_client)
+
     def test_bot_follower(self):
         self.mock_client.get_bots.return_value = {
             "bots": [

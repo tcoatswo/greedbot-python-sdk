@@ -7,9 +7,9 @@ to capture sustained directional trends with fractional Kelly risk sizing.
 
 from __future__ import annotations
 
-import math
 from typing import Any, Dict, List, Optional, Sequence
 from ..client import GreedBotClient
+from ..datasources.market import MarketDataSource
 from ..models import BotRunResult, OrderIntent, Side
 from ..quant.kelly import KellyPositionSizer
 from ..signals.trend import MovingAverageCrossover, TimeSeriesMomentum
@@ -79,10 +79,12 @@ class TrendFollowingStrategy(Strategy):
         client: Optional[GreedBotClient] = None,
         capital_usd: float = 10000.0,
         prices: Optional[Sequence[float]] = None,
+        market_data: Optional[MarketDataSource] = None,
     ) -> BotRunResult:
         if prices is None:
-            # Fetch synthetic / sample trend prices if not provided
-            prices = [100.0 + i * 0.5 + math.sin(i / 5.0) * 2.0 for i in range(80)]
+            if market_data is None:
+                raise ValueError("Provide historical prices or a market_data source")
+            prices = market_data.get_historical_prices(self.ticker)
 
         eval_res = self.evaluate_signal(prices)
         target_dollars: Dict[str, float] = {}

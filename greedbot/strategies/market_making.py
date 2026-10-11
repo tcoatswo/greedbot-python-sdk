@@ -7,6 +7,7 @@ to earn the bid-ask spread while dynamically managing inventory risk.
 
 from __future__ import annotations
 
+import math
 from typing import Any, Dict, List, Optional
 from ..client import GreedBotClient
 from ..models import BotRunResult, OrderIntent, Side
@@ -54,16 +55,23 @@ class MarketMakerStrategy(Strategy):
         self,
         client: Optional[GreedBotClient] = None,
         capital_usd: float = 10000.0,
-        mid_price: float = 100.0,
+        mid_price: Optional[float] = None,
         inventory_q: float = 0.0,
-        volatility_sigma: float = 0.02,
+        volatility_sigma: Optional[float] = None,
     ) -> BotRunResult:
+        if (mid_price is None or volatility_sigma is None
+                or not math.isfinite(mid_price) or mid_price <= 0
+                or not math.isfinite(volatility_sigma) or volatility_sigma <= 0
+                or not math.isfinite(inventory_q)):
+            raise ValueError("Provide a positive mid_price and volatility_sigma from market data")
         quotes = self.compute_quotes(
             mid_price=mid_price,
             inventory_q=inventory_q,
             volatility_sigma=volatility_sigma,
         )
 
+        ask_dollars = (min(self.quote_size_usd, inventory_q * quotes["ask_price"])
+                       if inventory_q > 0 else self.quote_size_usd)
         intents: List[OrderIntent] = [
             # Limit Buy at Bid
             OrderIntent(
@@ -76,12 +84,12 @@ class MarketMakerStrategy(Strategy):
             OrderIntent(
                 ticker=self.ticker.lower(),
                 side=Side.SELL if inventory_q > 0 else Side.SHORT_SELL,
-                dollars=self.quote_size_usd,
+                dollars=ask_dollars,
                 limit=quotes["ask_price"],
             ),
         ]
 
-        target_dollars = {self.ticker.lower(): self.quote_size_usd * 2.0}
+        target_dollars = {self.ticker.lower(): self.quote_size_usd + ask_dollars}
 
         return BotRunResult(
             trades=[quotes],
